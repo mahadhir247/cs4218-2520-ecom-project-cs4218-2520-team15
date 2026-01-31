@@ -14,6 +14,7 @@ export default {
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
     "\\.(css|scss)$": "identity-obj-proxy",
+    "^@components/(.*)$": "<rootDir>/client/src/components/$1",
     "^@pages/(.*)$": "<rootDir>/client/src/pages/$1",
   },
 
