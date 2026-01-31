@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "types": ["jest", "@testing-library/jest-dom"],
-    "checkJs": false
+    "checkJs": false,
+    "paths": {
+      "@pages/*": ["./src/pages/*"]
+    }
   },
   "include": ["**/*.js", "**/*.test.js"]
 }
