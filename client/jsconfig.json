@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "types": ["jest", "@testing-library/jest-dom"],
+    "checkJs": false
+  },
+  "include": ["**/*.js", "**/*.test.js"]
+}
