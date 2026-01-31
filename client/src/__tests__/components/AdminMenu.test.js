@@ -1,5 +1,5 @@
-import AdminMenu from "@components/AdminMenu";
 import { render } from "@testing-library/react";
+import AdminMenu from "../../components/AdminMenu";
 
 jest.mock("react-router-dom", () => ({
   NavLink: ({ to, children, ...props }) => (

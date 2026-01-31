@@ -1,9 +1,9 @@
-import Register from "@pages/Auth/Register";
 import "@testing-library/jest-dom/extend-expect";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import Register from "../../../pages/Auth/Register";
 
 // Mocking axios.post
 jest.mock("axios");
