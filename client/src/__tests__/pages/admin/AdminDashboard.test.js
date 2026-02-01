@@ -7,7 +7,7 @@ jest.mock("@components/Layout", () => ({ children, ...props }) => (
 jest.mock("@components/AdminMenu");
 jest.mock("@context/auth", () => ({ useAuth: jest.fn() }));
 
-import { useAuth } from "@context/auth";
+import { useAuth } from "../../../context/auth";
 
 describe("AdminDashboard page", () => {
   afterEach(() => {
