@@ -39,6 +39,25 @@ describe("AdminDashboard page", () => {
     ).toBeInTheDocument();
   });
 
+  it("should render malformed user details correctly", () => {
+    useAuth.mockReturnValue([
+      {
+        user: {
+          displayName: "John Doe",
+          emailAddress: "john.doe@example.com",
+          phoneNumber: 91234567,
+        },
+      },
+      jest.fn(),
+    ]);
+
+    const { getByText, container } = render(<AdminDashboard />);
+
+    expect(getByText("Admin Name :", { exact: true })).toBeInTheDocument();
+    expect(getByText("Admin Email :", { exact: true })).toBeInTheDocument();
+    expect(getByText("Admin Contact :", { exact: true })).toBeInTheDocument();
+  });
+
   it("should render missing user details correctly", () => {
     useAuth.mockReturnValue([null, jest.fn()]);
 
