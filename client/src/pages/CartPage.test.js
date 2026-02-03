@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
 import axios from "axios";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
@@ -10,7 +11,7 @@ jest.mock("axios");
 jest.mock("react-hot-toast");
 jest.mock("../components/Layout", () => {
   return function MockLayout({ children }) {
-    return <div data-testid="layout-mock">{children}</div>;
+    return <div>{children}</div>;
   };
 });
 jest.mock("../context/cart", () => ({
@@ -25,14 +26,13 @@ jest.mock("react-router-dom", () => ({
 }));
 jest.mock("braintree-web-drop-in-react", () => {
   return function MockDropIn() {
-    return <div data-testid="dropin-mock" />;
+    return <div />;
   };
 });
 
 describe("CartPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Specify what happens when axios.get is called (getToken runs in useEffect on mount)
     axios.get.mockResolvedValue({ data: { clientToken: "mock-braintree-token" } });
     Object.defineProperty(window, "localStorage", {
       value: {
@@ -45,18 +45,20 @@ describe("CartPage", () => {
     });
   });
 
-  test("renders empty cart message for guest user", () => {
+  test("renders empty cart message for guest user", async () => {
     useAuth.mockReturnValue([{ user: null, token: null }, jest.fn()]);
     useCart.mockReturnValue([[], jest.fn()]);
     useNavigate.mockReturnValue(jest.fn());
 
-    render(<CartPage />);
+    await act(async () => {
+      render(<CartPage />);
+    });
 
     expect(screen.getByText("Hello Guest")).toBeInTheDocument();
     expect(screen.getByText(/Your Cart Is Empty/i)).toBeInTheDocument();
   });
 
-  test("displays item count and total price when cart has items", () => {
+  test("displays item count and total price when cart has items", async () => {
     const cartItems = [
       { _id: "1", name: "Item 1", description: "First item description", price: 10 },
       { _id: "2", name: "Item 2", description: "Second item description", price: 20 },
@@ -65,7 +67,9 @@ describe("CartPage", () => {
     useCart.mockReturnValue([cartItems, jest.fn()]);
     useNavigate.mockReturnValue(jest.fn());
 
-    render(<CartPage />);
+    await act(async () => {
+      render(<CartPage />);
+    });
 
     expect(screen.getByText(/You Have 2 items in your cart/i)).toBeInTheDocument();
     expect(screen.getByText("Item 1")).toBeInTheDocument();
@@ -73,7 +77,7 @@ describe("CartPage", () => {
     expect(screen.getByText(/Total :/i)).toHaveTextContent("Total : $30.00");
   });
 
-  test("removes item from cart and updates localStorage when Remove button is clicked", () => {
+  test("removes item from cart and updates localStorage when Remove button is clicked", async () => {
     const cartItems = [
       { _id: "1", name: "Item 1", description: "First item description", price: 10 },
       { _id: "2", name: "Item 2", description: "Second item description", price: 20 },
@@ -83,12 +87,17 @@ describe("CartPage", () => {
     useCart.mockReturnValue([cartItems, mockSetCart]);
     useNavigate.mockReturnValue(jest.fn());
 
-    render(<CartPage />);
+    await act(async () => {
+      render(<CartPage />);
+    });
 
     const removeButtons = screen.getAllByText(/Remove/i);
     fireEvent.click(removeButtons[0]);
 
     expect(mockSetCart).toHaveBeenCalledWith([cartItems[1]]);
-    expect(window.localStorage.setItem).toHaveBeenCalledWith("cart", JSON.stringify([cartItems[1]]));
+    expect(window.localStorage.setItem).toHaveBeenCalledWith(
+      "cart",
+      JSON.stringify([cartItems[1]])
+    );
   });
 });
