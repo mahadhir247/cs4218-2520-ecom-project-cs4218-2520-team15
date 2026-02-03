@@ -1,29 +1,46 @@
-import { braintreeTokenController, brainTreePaymentController } from "./productController.js";
-import orderModel from "../models/orderModel.js";
+import { jest, describe, test, expect, beforeEach } from "@jest/globals";
 
 const mockGenerate = jest.fn();
 const mockSale = jest.fn();
+const mockSave = jest.fn().mockResolvedValue({});
+const MockOrderModel = jest.fn(() => ({ save: mockSave }));
 
-jest.mock("braintree", () => ({
-  BraintreeGateway: jest.fn(() => ({
-    clientToken: { generate: mockGenerate },
-    transaction: { sale: mockSale },
-  })),
-  Environment: { Sandbox: "sandbox" },
+await jest.unstable_mockModule("braintree", () => ({
+  default: {
+    BraintreeGateway: jest.fn(() => ({
+      clientToken: { generate: mockGenerate },
+      transaction: { sale: mockSale },
+    })),
+    Environment: { Sandbox: "sandbox" },
+  },
 }));
 
-jest.mock("../models/orderModel.js", () => {
-  const mockSave = jest.fn().mockResolvedValue({});
-  const MockOrderModel = jest.fn(() => ({ save: mockSave }));
-  MockOrderModel.mockSave = mockSave;
-  return { default: MockOrderModel, __esModule: true };
-});
+await jest.unstable_mockModule("../models/orderModel.js", () => ({
+  default: MockOrderModel,
+}));
 
-jest.mock("dotenv", () => ({ config: jest.fn() }));
-jest.mock("../models/productModel.js", () => jest.fn());
-jest.mock("../models/categoryModel.js", () => jest.fn());
-jest.mock("fs", () => jest.fn());
-jest.mock("slugify", () => jest.fn());
+await jest.unstable_mockModule("dotenv", () => ({
+  default: { config: jest.fn() },
+}));
+
+await jest.unstable_mockModule("../models/productModel.js", () => ({
+  default: jest.fn(),
+}));
+
+await jest.unstable_mockModule("../models/categoryModel.js", () => ({
+  default: jest.fn(),
+}));
+
+await jest.unstable_mockModule("fs", () => ({
+  default: jest.fn(),
+}));
+
+await jest.unstable_mockModule("slugify", () => ({
+  default: jest.fn(),
+}));
+
+const { braintreeTokenController, brainTreePaymentController } =
+  await import("./productController.js");
 
 function createRes() {
   const res = {};
@@ -109,7 +126,7 @@ describe("brainTreePaymentController", () => {
     expect(saleArgs.paymentMethodNonce).toBe("test-nonce");
     expect(saleArgs.options.submitForSettlement).toBe(true);
 
-    expect(orderModel).toHaveBeenCalledWith({
+    expect(MockOrderModel).toHaveBeenCalledWith({
       products: cart,
       payment: { status: "submitted_for_settlement" },
       buyer: "user-123",
@@ -134,7 +151,7 @@ describe("brainTreePaymentController", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith(paymentError);
-    expect(orderModel).not.toHaveBeenCalled();
+    expect(MockOrderModel).not.toHaveBeenCalled();
   });
 
   test("calculates total correctly for multiple cart items", async () => {
