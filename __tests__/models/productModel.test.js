@@ -25,6 +25,10 @@ describe("Product Model Test", () => {
       price: 999,
       category: new mongoose.Types.ObjectId(),
       quantity: 50,
+      photo: { 
+        data: Buffer.from("fake-image-data-string"), 
+        contentType: "image/png" 
+      }
     };
     const newProduct = new productModel(validProduct);
     const savedProduct = await newProduct.save();
@@ -33,14 +37,18 @@ describe("Product Model Test", () => {
     expect(savedProduct.name).toBe(validProduct.name);
   });
 
-  it("should fail if a required field is missing", async () => {
+  it("should fail if a required field is missing (name)", async () => {
     const productWithoutName = new productModel({ 
       // should fail: missing name
       slug: "test-item", 
       description: "test-item description",
       price: 10,
       category: new mongoose.Types.ObjectId(),
-      quantity: 2
+      quantity: 2,
+      photo: { 
+        data: Buffer.from("fake-image-data-string"), 
+        contentType: "image/png" 
+      }
     });
     
     let err;
@@ -54,6 +62,28 @@ describe("Product Model Test", () => {
     expect(err.errors.name).toBeDefined();
   });
 
+  it("should fail if a required field is missing (photo)", async () => {
+    const productWithoutPhoto = new productModel({ 
+      name: "Test Item",
+      slug: "test-item", 
+      description: "test-item description",
+      price: 10,
+      category: new mongoose.Types.ObjectId(),
+      quantity: 2
+      // should fail: missing photo
+    });
+    
+    let err;
+    try {
+      await productWithoutPhoto.save();
+    } catch (error) {
+      err = error;
+    }
+    
+    expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
+    expect(err.errors.photo).toBeDefined();
+  });
+
   it("should fail if price is not a number", async () => {
     const productWithInvalidPrice = new productModel({
       name: "Bad Price",
@@ -61,7 +91,11 @@ describe("Product Model Test", () => {
       description: "test",
       price: "not-a-number", // should fail: invalid price
       category: new mongoose.Types.ObjectId(),
-      quantity: 1
+      quantity: 1,
+      photo: { 
+        data: Buffer.from("fake-image-data-string"), 
+        contentType: "image/png" 
+      }
     });
 
     let err;
