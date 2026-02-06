@@ -1,9 +1,11 @@
-import { registerController } from "../../controllers/authController";
+import { loginController, registerController } from "../../controllers/authController";
 import userModel from "../../models/userModel.js";
-import { hashPassword } from "../../helpers/authHelper.js";
+import { hashPassword, comparePassword } from "../../helpers/authHelper.js";
+import JWT from "jsonwebtoken";
 
 jest.mock("../../models/userModel.js");
 jest.mock("../../helpers/authHelper.js");
+jest.mock("jsonwebtoken");
 
 describe("Auth Controller Test", () => {
     let req, res;
@@ -165,6 +167,100 @@ describe("Auth Controller Test", () => {
                 expect.objectContaining({ 
                     success: false, 
                     message: "Error in Registration" 
+                })
+            );
+        });
+    });
+
+    describe("loginController", () => {
+        it("should return error if missing email", async () => {
+            req.body = {
+                // email: 'test@gmail.com',
+                password: 'testpassword',
+            }
+
+            await loginController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid email or password" });
+        });
+
+        it("should return error if missing password", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                // password: 'testpassword',
+            }
+
+            await loginController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid email or password" });
+        });
+
+        it("should return error if user not registered", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                password: 'testpassword',
+            }
+            userModel.findOne.mockResolvedValue(null);
+
+            await loginController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Email is not registered" });
+        });
+
+        it("should return error if password does not match", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                password: 'testpassword',
+            }
+            userModel.findOne.mockResolvedValue({ email: 'test@gmail.com' });
+            comparePassword.mockResolvedValue(false);
+
+            await loginController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid Password" });
+        });
+
+        it("should login user successfully", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                password: 'testpassword',
+            }
+            userModel.findOne.mockResolvedValue({ email: 'test@gmail.com' });
+            comparePassword.mockResolvedValue(true);
+            JWT.sign.mockResolvedValue('mockToken');
+            
+            await loginController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    success: true,
+                    message: "login successfully",
+                    token: "mockToken"
+                })
+            );
+        });
+
+        it("should return 500 if internal error is thrown", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                password: 'testpassword',
+            }
+            userModel.findOne.mockResolvedValue({ email: 'test@gmail.com' });
+            comparePassword.mockResolvedValue(true);
+            JWT.sign.mockImplementation(() => { throw new Error("mock-error") });
+
+            await loginController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith(
+                expect.objectContaining({ 
+                    success: false, 
+                    message: "Error in login" 
                 })
             );
         })
