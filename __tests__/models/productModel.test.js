@@ -81,7 +81,8 @@ describe("Product Model Test", () => {
     }
     
     expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
-    expect(err.errors.photo).toBeDefined();
+    expect(err.errors['photo.data']).toBeDefined();
+    expect(err.errors['photo.contentType']).toBeDefined();
   });
 
   it("should fail if price is not a number", async () => {
