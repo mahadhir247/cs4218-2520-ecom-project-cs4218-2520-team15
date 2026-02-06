@@ -1,7 +1,8 @@
-import { loginController, registerController } from "../../controllers/authController";
+import { forgotPasswordController, loginController, registerController } from "../../controllers/authController";
 import userModel from "../../models/userModel.js";
 import { hashPassword, comparePassword } from "../../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
+import { afterEach } from "node:test";
 
 jest.mock("../../models/userModel.js");
 jest.mock("../../helpers/authHelper.js");
@@ -18,8 +19,11 @@ describe("Auth Controller Test", () => {
             send: jest.fn().mockReturnThis(),
             status: jest.fn().mockReturnThis(),
         };
-        jest.clearAllMocks();
     });
+
+    afterEach(() => {
+        jest.resetAllMocks();
+    })
 
     describe("registerController", () => {
         it("should return error if name is missing", async () => {
@@ -169,6 +173,8 @@ describe("Auth Controller Test", () => {
                     message: "Error in Registration" 
                 })
             );
+
+            hashPassword.mockReset();
         });
     });
 
@@ -263,6 +269,102 @@ describe("Auth Controller Test", () => {
                     message: "Error in login" 
                 })
             );
+
+            JWT.sign.mockReset();
+        });
+    });
+
+    describe("forgotPasswordController", () => {
+        it("should return error if missing email", async () => {
+            req.body = {
+                // email: 'test@gmail.com',
+                answer: 'test',
+                newPassword: 'test'
+            }
+
+            await forgotPasswordController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith({ message: "Email is required" });
+        });
+
+        it("should return error if missing answer", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                // answer: 'test',
+                newPassword: 'test'
+            }
+
+            await forgotPasswordController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith({ message: "Answer is required" });
+        });
+
+        it("should return error if missing new password", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                answer: 'test',
+                // newPassword: 'test'
+            }
+
+            await forgotPasswordController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith({ message: "New Password is required" });
+        });
+
+        // Source code validates by finding email, answer pair in db
+        it("should return error if wrong email or answer", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                answer: 'test',
+                newPassword: 'test'
+            }
+            userModel.findOne.mockResolvedValue(null);
+
+            await forgotPasswordController(req, res);
+
+            expect(userModel.findOne).toHaveBeenCalledWith({ email: 'test@gmail.com', answer: 'test' });
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Wrong Email Or Answer" });
+        });
+
+        it("should reset password successfully", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                answer: 'test',
+                newPassword: 'test'
+            }
+            userModel.findOne.mockResolvedValue({ _id: 1 });
+            hashPassword.mockResolvedValue('mockHashedPassword');
+
+            await forgotPasswordController(req, res);
+
+            expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(1, { password: 'mockHashedPassword' });
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({ success: true, message: "Password Reset Successfully" });
+        });
+
+        it("should return 500 if internal error is thrown", async () => {
+            req.body = {
+                email: 'test@gmail.com',
+                answer: 'test',
+                newPassword: 'test'
+            }
+            userModel.findOne.mockImplementation(() => { throw new Error("mock-error") });
+
+            await forgotPasswordController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith(
+                expect.objectContaining({ 
+                    success: false, 
+                    message: "Something went wrong"
+                })
+            );
+
+            userModel.findOne.mockReset();
         })
     });
 });
