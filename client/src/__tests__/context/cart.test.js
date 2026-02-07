@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { CartProvider, useCart } from "./cart";
+import { CartProvider, useCart } from "../../context/cart";
 
 const CartConsumer = () => {
   const [cart, setCart] = useCart();
