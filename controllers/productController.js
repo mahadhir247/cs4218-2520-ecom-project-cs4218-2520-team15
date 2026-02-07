@@ -307,7 +307,7 @@ export const relatedProductController = async (req, res) => {
       .limit(3)
       .populate("category");
     
-    if (products.length === 0 || !products) {
+    if (products.length === 0) {
       return res.status(404).send({
         success: false,
         message: "No related products found",
@@ -342,7 +342,7 @@ export const productCategoryController = async (req, res) => {
 
     const products = await productModel.find({ category }).populate("category");
 
-    if (products.length === 0 || !products) {
+    if (products.length === 0) {
       return res.status(404).send({
         success: false,
         message: "No products found in this category",
