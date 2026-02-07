@@ -7,7 +7,7 @@ const MockCategoryModel = jest.fn();
 MockCategoryModel.findOne = mockFindOne;
 MockCategoryModel.find = mockFind;
 
-await jest.unstable_mockModule("../models/categoryModel.js", () => ({
+await jest.unstable_mockModule("../../models/categoryModel.js", () => ({
   default: MockCategoryModel,
 }));
 
@@ -18,7 +18,7 @@ await jest.unstable_mockModule("slugify", () => ({
 const {
   categoryControlller,
   singleCategoryController,
-} = await import("./categoryController.js");
+} = await import("../../controllers/categoryController.js");
 
 function createRes() {
   const res = {};
