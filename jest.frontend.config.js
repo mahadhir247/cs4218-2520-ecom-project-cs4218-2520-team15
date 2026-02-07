@@ -24,8 +24,7 @@ export default {
 
   // only run these tests
   testMatch: [
-    "<rootDir>/client/src/pages/Auth/*.test.js",
-    "<rootDir>/client/src/pages/*.test.js",
+    "<rootDir>/client/src/__tests__/**/*.test.js"
   ],
 
   // jest code coverage

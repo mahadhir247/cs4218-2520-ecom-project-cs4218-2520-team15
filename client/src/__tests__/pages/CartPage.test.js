@@ -2,22 +2,22 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import axios from "axios";
-import { useCart } from "../context/cart";
-import { useAuth } from "../context/auth";
+import { useCart } from "../../context/cart";
+import { useAuth } from "../../context/auth";
 import { useNavigate } from "react-router-dom";
-import CartPage from "./CartPage";
+import CartPage from "../../pages/CartPage";
 
 jest.mock("axios");
 jest.mock("react-hot-toast");
-jest.mock("../components/Layout", () => {
+jest.mock("../../components/Layout", () => {
   return function MockLayout({ children }) {
     return <div>{children}</div>;
   };
 });
-jest.mock("../context/cart", () => ({
+jest.mock("../../context/cart", () => ({
   useCart: jest.fn(),
 }));
-jest.mock("../context/auth", () => ({
+jest.mock("../../context/auth", () => ({
   useAuth: jest.fn(),
 }));
 jest.mock("react-router-dom", () => ({
