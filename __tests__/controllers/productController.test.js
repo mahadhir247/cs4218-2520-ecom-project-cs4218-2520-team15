@@ -15,7 +15,7 @@ await jest.unstable_mockModule("braintree", () => ({
   },
 }));
 
-await jest.unstable_mockModule("../models/orderModel.js", () => ({
+await jest.unstable_mockModule("../../models/orderModel.js", () => ({
   default: MockOrderModel,
 }));
 
@@ -23,11 +23,11 @@ await jest.unstable_mockModule("dotenv", () => ({
   default: { config: jest.fn() },
 }));
 
-await jest.unstable_mockModule("../models/productModel.js", () => ({
+await jest.unstable_mockModule("../../models/productModel.js", () => ({
   default: jest.fn(),
 }));
 
-await jest.unstable_mockModule("../models/categoryModel.js", () => ({
+await jest.unstable_mockModule("../../models/categoryModel.js", () => ({
   default: jest.fn(),
 }));
 
@@ -40,7 +40,7 @@ await jest.unstable_mockModule("slugify", () => ({
 }));
 
 const { braintreeTokenController, brainTreePaymentController } =
-  await import("./productController.js");
+  await import("../../controllers/productController.js");
 
 function createRes() {
   const res = {};
