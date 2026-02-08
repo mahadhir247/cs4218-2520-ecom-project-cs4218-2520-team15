@@ -26,6 +26,9 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Silence console.log statements during test run
+    jest.spyOn(console, "log").mockImplementation(() => {});
+
     req = { params: {} };
     res = {
       status: jest.fn().mockReturnThis(),
