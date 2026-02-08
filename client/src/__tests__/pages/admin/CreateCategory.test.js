@@ -20,6 +20,15 @@ jest.mock("@context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
 }));
 
+Object.defineProperty(window, "localStorage", {
+  value: {
+    setItem: jest.fn(),
+    getItem: jest.fn(),
+    removeItem: jest.fn(),
+  },
+  writable: true,
+});
+
 const CreateCategoryWithTestWrapper = () => (
   <MemoryRouter initialEntries={["/admin/create-category"]}>
     <Routes>
@@ -33,71 +42,77 @@ describe("CreateCategory admin page", () => {
     jest.spyOn(console, "log").mockImplementation(() => {}); // To silence console.log statements
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should render correctly", async () => {
-    axios.get.mockResolvedValue({
-      data: {
-        success: true,
-        category: [
-          { _id: "1", name: "Category A" },
-          { _id: "2", name: "Category B" },
-        ],
-      },
+  describe("View category action", () => {
+    it("should render correctly", async () => {
+      axios.get.mockResolvedValue({
+        data: {
+          success: true,
+          category: [
+            { _id: "1", name: "Category A" },
+            { _id: "2", name: "Category B" },
+          ],
+        },
+      });
+
+      const { findByText, queryAllByText } = render(
+        <CreateCategoryWithTestWrapper />,
+      );
+
+      await waitFor(() => expect(axios.get).toHaveBeenCalled());
+      expect(
+        await findByText("Category A", { selector: "td", exact: true }),
+      ).toBeInTheDocument();
+      expect(
+        await findByText("Category B", { selector: "td", exact: true }),
+      ).toBeInTheDocument();
+      expect(queryAllByText("Edit", { selector: "button" })).toHaveLength(2);
+      expect(queryAllByText("Delete", { selector: "button" })).toHaveLength(2);
     });
 
-    const { findByText, queryAllByText } = render(
-      <CreateCategoryWithTestWrapper />,
-    );
+    it("should render empty categories correctly", async () => {
+      axios.get.mockResolvedValue({
+        data: {
+          success: true,
+          category: [],
+        },
+      });
 
-    await waitFor(() => expect(axios.get).toHaveBeenCalled());
-    expect(
-      await findByText("Category A", { selector: "td", exact: true }),
-    ).toBeInTheDocument();
-    expect(
-      await findByText("Category B", { selector: "td", exact: true }),
-    ).toBeInTheDocument();
-    expect(queryAllByText("Edit", { selector: "button" })).toHaveLength(2);
-    expect(queryAllByText("Delete", { selector: "button" })).toHaveLength(2);
-  });
+      const { queryAllByText } = render(<CreateCategoryWithTestWrapper />);
 
-  it("should render empty categories correctly", async () => {
-    axios.get.mockResolvedValue({
-      data: {
-        success: true,
-        category: [],
-      },
+      await waitFor(() => expect(axios.get).toHaveBeenCalled());
+      expect(queryAllByText("Edit", { selector: "button" })).toHaveLength(0);
+      expect(queryAllByText("Delete", { selector: "button" })).toHaveLength(0);
     });
 
-    const { queryAllByText } = render(<CreateCategoryWithTestWrapper />);
+    it("should do nothing if get category fails (application error)", async () => {
+      axios.get.mockResolvedValue({
+        data: { success: false },
+      });
 
-    await waitFor(() => expect(axios.get).toHaveBeenCalled());
-    expect(queryAllByText("Edit", { selector: "button" })).toHaveLength(0);
-    expect(queryAllByText("Delete", { selector: "button" })).toHaveLength(0);
-  });
+      render(<CreateCategoryWithTestWrapper />);
 
-  it("should do nothing if get category fails (application error)", async () => {
-    axios.get.mockResolvedValue({
-      data: { success: false },
+      await waitFor(() => expect(axios.get).toHaveBeenCalled());
+      expect(toast.error).toHaveBeenCalledTimes(0);
     });
 
-    render(<CreateCategoryWithTestWrapper />);
+    it("should prompt error if get category fails (server error)", async () => {
+      axios.get.mockRejectedValue(new Error("Get all category error"));
 
-    await waitFor(() => expect(axios.get).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledTimes(0);
-  });
+      render(<CreateCategoryWithTestWrapper />);
 
-  it("should prompt error if get category fails (server error)", async () => {
-    axios.get.mockRejectedValue(new Error("Get all category error"));
-
-    render(<CreateCategoryWithTestWrapper />);
-
-    await waitFor(() => expect(axios.get).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith(
-      "Something went wrong in getting category",
-    );
+      await waitFor(() => expect(axios.get).toHaveBeenCalled());
+      expect(toast.error).toHaveBeenCalledWith(
+        "Something went wrong in getting category",
+      );
+    });
   });
 
   describe("Create category action", () => {
