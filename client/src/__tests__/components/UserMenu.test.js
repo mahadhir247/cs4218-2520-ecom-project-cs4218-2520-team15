@@ -10,7 +10,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 describe("UserMenu component", () => {
-    it("should render user menu", async () => {
+    it("should render user menu", () => {
         const { getByText } = render(<UserMenu />);
 
         expect(getByText("Dashboard")).toBeInTheDocument();
