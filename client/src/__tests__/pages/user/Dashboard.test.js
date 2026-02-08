@@ -1,6 +1,6 @@
-const { render } = require("@testing-library/react");
-const { default: Dashboard } = require("../../../pages/user/Dashboard");
-const { useAuth } = require("../../../context/auth");
+import { render } from "@testing-library/react";
+import Dashboard from "../../../pages/user/Dashboard";
+import { useAuth } from "../../../context/auth";
 
 jest.mock("@components/Layout", () => ({ children, ...props }) => (
   <div {...props}>{children}</div>
