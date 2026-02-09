@@ -344,13 +344,6 @@ export const productCategoryController = async (req, res) => {
 
     const products = await productModel.find({ category }).populate("category");
 
-    if (products.length === 0) {
-      return res.status(404).send({
-        success: false,
-        message: "No products found in this category",
-      });
-    }
-
     res.status(200).send({
       success: true,
       message: "Products by category fetched successfully",

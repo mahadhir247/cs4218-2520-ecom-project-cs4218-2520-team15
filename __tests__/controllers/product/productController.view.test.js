@@ -343,7 +343,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     expect(sentData.message).toBe("Category not found");
   });
 
-  it("should handle error when no products in category are found", async () => {
+  it("should have no error when no products in category are found", async () => {
     const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
 
     const populateMock = jest.fn().mockResolvedValue([]);
@@ -360,10 +360,10 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     expect(populateMock).toHaveBeenCalledWith("category");
     expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
 
-    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.status).toHaveBeenCalledWith(200);
     const sentData = res.send.mock.calls[0][0];
-    expect(sentData.success).toBe(false);
-    expect(sentData.message).toBe("No products found in this category");
+    expect(sentData.success).toBe(true);
+    expect(sentData.message).toBe("Products by category fetched successfully");
   });
 
   it("should handle errors in fetching products by category (category)", async () => {
