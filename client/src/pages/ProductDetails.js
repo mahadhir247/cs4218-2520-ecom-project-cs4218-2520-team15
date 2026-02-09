@@ -28,6 +28,7 @@ const ProductDetails = () => {
       getSimilarProduct(data?.product._id, data?.product.category._id);
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong");
     }
   };
 
@@ -40,6 +41,7 @@ const ProductDetails = () => {
       setRelatedProducts(data?.products);
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong");
     }
   };
 
