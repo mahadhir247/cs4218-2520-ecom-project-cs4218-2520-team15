@@ -315,13 +315,6 @@ export const relatedProductController = async (req, res) => {
       .select("-photo")
       .limit(3)
       .populate("category");
-    
-    if (products.length === 0) {
-      return res.status(404).send({
-        success: false,
-        message: "No related products found",
-      });
-    }
 
     res.status(200).send({
       success: true,
@@ -361,13 +354,6 @@ export const productCategoryController = async (req, res) => {
       .sort({ createdAt: -1 });
 
     const total = await productModel.countDocuments({ category });
-
-    if (products.length === 0 && page === 1) {
-      return res.status(404).send({
-        success: false,
-        message: "No products found in this category",
-      });
-    }
 
     res.status(200).send({
       success: true,
