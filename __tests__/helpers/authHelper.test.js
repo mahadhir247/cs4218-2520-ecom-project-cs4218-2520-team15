@@ -5,7 +5,7 @@ jest.mock("bcrypt");
 
 describe("authHelper Tests", () => {
     const mockError = new Error("mock-error");
-
+    
     describe("hashPassword", () => {
         it("should return hashed password", async () => {
             const mockHash = "mockhashedvalue";
@@ -39,7 +39,7 @@ describe("authHelper Tests", () => {
             expect(spy).toHaveBeenCalledWith("password", "hashPassword");
             spy.mockRestore();
         });
-
+        
         it("should log error if internal error is thrown", async () => {
             jest.spyOn(global.console, 'log').mockImplementation(() => {});
             bcrypt.compare.mockImplementation(() => { throw mockError });

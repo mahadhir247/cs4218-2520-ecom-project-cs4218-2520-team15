@@ -47,7 +47,7 @@ describe("authMiddleware Tests", () => {
             expect(next).toHaveBeenCalled();
         });
 
-        it("should log error if internal error is thrown", async () => {
+        it("should return 500 if internal error is thrown", async () => {
             const mockError = new Error("mock-error");
             JWT.verify.mockImplementation(() => { throw mockError });
 
@@ -55,6 +55,8 @@ describe("authMiddleware Tests", () => {
 
             expect(console.log).toHaveBeenCalledWith(mockError);
             expect(next).not.toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith({ success: false, error: mockError, message: "Error in sign in middleware" });
             JWT.verify.mockReset();
         });
     });
@@ -91,14 +93,14 @@ describe("authMiddleware Tests", () => {
             expect(next).toHaveBeenCalled();
         });
 
-        it("should return 401 if internal error is thrown", async() => {
+        it("should return 501 if internal error is thrown", async() => {
             const mockError = new Error("mock-error");
             userModel.findById.mockImplementation(() => { throw mockError });
 
             await isAdmin(req, res, next);
 
             expect(console.log).toHaveBeenCalledWith(mockError);
-            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith({ success: false, error: mockError, message: "Error in admin middleware" });
             userModel.findById.mockReset();
         });
