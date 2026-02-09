@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import orderModel from "../../models/orderModel.js";
+import { before } from "node:test";
 
 let mongoServer;
 
@@ -13,6 +14,13 @@ beforeAll(async () => {
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
+});
+
+beforeEach(async () => {
+  const { collections } = mongoose.connection;
+  for (const key in collections) {
+    await collections[key].deleteMany({});
+  }
 });
 
 describe("Order Model", () => {
