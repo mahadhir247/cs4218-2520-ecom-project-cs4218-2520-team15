@@ -84,7 +84,7 @@ describe("singleCategoryController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Get SIngle Category SUccessfully",
+      message: "Get Single Category SUccessfully",
       category,
     });
   });
