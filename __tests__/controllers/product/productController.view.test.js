@@ -303,26 +303,48 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   // ============================================================
   // 4. productCategoryController
   // ============================================================
-  it("should fetch products by category successfully", async () => {
+  it("should fetch products by category successfully with pagination", async () => {
     const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
     const mockProducts = [
       { name: "Product 1", category: mockCategory },
       { name: "Product 2", category: mockCategory },
+      { name: "Product 3", category: mockCategory },
     ];
 
-    const populateMock = jest.fn().mockResolvedValue(mockProducts);
+    const selectMock = jest.fn();
+    const skipMock = jest.fn();
+    const limitMock = jest.fn();
+    const populateMock = jest.fn();
+    const sortMock = jest.fn().mockResolvedValue(mockProducts);
+
+    const mockChain = {
+      select: selectMock,
+      skip: skipMock,
+      limit: limitMock,
+      populate: populateMock,
+      sort: sortMock,
+    };
+
+    selectMock.mockReturnValue(mockChain);
+    skipMock.mockReturnValue(mockChain);
+    limitMock.mockReturnValue(mockChain);
+    populateMock.mockReturnValue(mockChain);
 
     categoryModel.findOne.mockResolvedValue(mockCategory);
-    productModel.find.mockReturnValue({
-      populate: populateMock,
-    });
+    productModel.find.mockReturnValue(mockChain);
+    productModel.countDocuments.mockResolvedValue(10);
 
-    req.params.slug = "test-category";
+    req.params = { slug: "test-category", page: "1" };
     await productCategoryController(req, res);
 
     expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "test-category" });
-    expect(populateMock).toHaveBeenCalledWith("category");
     expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(skipMock).toHaveBeenCalledWith(0);
+    expect(limitMock).toHaveBeenCalledWith(3);
+    expect(populateMock).toHaveBeenCalledWith("category");
+    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+    expect(productModel.countDocuments).toHaveBeenCalledWith({ category: mockCategory });
     
     expect(res.status).toHaveBeenCalledWith(200);
     const sentData = res.send.mock.calls[0][0];
@@ -330,6 +352,49 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     expect(sentData.message).toBe("Products by category fetched successfully");
     expect(sentData.category).toEqual(mockCategory);
     expect(sentData.products).toEqual(mockProducts);
+    expect(sentData.total).toBe(10);
+  });
+
+  it("should fetch products with correct pagination offset for page 2", async () => {
+    const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
+    const mockProducts = [
+      { name: "Product 4", category: mockCategory },
+      { name: "Product 5", category: mockCategory },
+    ];
+
+    const selectMock = jest.fn();
+    const skipMock = jest.fn();
+    const limitMock = jest.fn();
+    const populateMock = jest.fn();
+    const sortMock = jest.fn().mockResolvedValue(mockProducts);
+
+    const mockChain = {
+      select: selectMock,
+      skip: skipMock,
+      limit: limitMock,
+      populate: populateMock,
+      sort: sortMock,
+    };
+
+    selectMock.mockReturnValue(mockChain);
+    skipMock.mockReturnValue(mockChain);
+    limitMock.mockReturnValue(mockChain);
+    populateMock.mockReturnValue(mockChain);
+
+    categoryModel.findOne.mockResolvedValue(mockCategory);
+    productModel.find.mockReturnValue(mockChain);
+    productModel.countDocuments.mockResolvedValue(10);
+
+    req.params = { slug: "test-category", page: "2" };
+    await productCategoryController(req, res);
+
+    expect(skipMock).toHaveBeenCalledWith(3);
+    expect(limitMock).toHaveBeenCalledWith(3);
+    
+    expect(res.status).toHaveBeenCalledWith(200);
+    const sentData = res.send.mock.calls[0][0];
+    expect(sentData.success).toBe(true);
+    expect(sentData.total).toBe(10);
   });
 
   it("should handle error when no category is found", async () => {
@@ -346,27 +411,74 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     expect(sentData.message).toBe("Category not found");
   });
 
-  it("should handle error when no products in category are found", async () => {
+  it("should handle error when no products in category are found on page 1", async () => {
     const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
 
-    const populateMock = jest.fn().mockResolvedValue([]);
+    const selectMock = jest.fn();
+    const skipMock = jest.fn();
+    const limitMock = jest.fn();
+    const populateMock = jest.fn();
+    const sortMock = jest.fn().mockResolvedValue([]);
+
+    const mockChain = {
+      select: selectMock,
+      skip: skipMock,
+      limit: limitMock,
+      populate: populateMock,
+      sort: sortMock,
+    };
+
+    selectMock.mockReturnValue(mockChain);
+    skipMock.mockReturnValue(mockChain);
+    limitMock.mockReturnValue(mockChain);
+    populateMock.mockReturnValue(mockChain);
 
     categoryModel.findOne.mockResolvedValue(mockCategory);
-    productModel.find.mockReturnValue({
-      populate: populateMock,
-    });
+    productModel.find.mockReturnValue(mockChain);
+    productModel.countDocuments.mockResolvedValue(0);
 
-    req.params.slug = "test-category";
+    req.params = { slug: "test-category" };
     await productCategoryController(req, res);
-
-    expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "test-category" });
-    expect(populateMock).toHaveBeenCalledWith("category");
-    expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
 
     expect(res.status).toHaveBeenCalledWith(404);
     const sentData = res.send.mock.calls[0][0];
     expect(sentData.success).toBe(false);
     expect(sentData.message).toBe("No products found in this category");
+  });
+
+  it("should return empty products for page beyond available pages", async () => {
+    const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
+
+    const selectMock = jest.fn();
+    const skipMock = jest.fn();
+    const limitMock = jest.fn();
+    const populateMock = jest.fn();
+    const sortMock = jest.fn().mockResolvedValue([]);
+
+    const mockChain = {
+      select: selectMock,
+      skip: skipMock,
+      limit: limitMock,
+      populate: populateMock,
+      sort: sortMock,
+    };
+
+    selectMock.mockReturnValue(mockChain);
+    skipMock.mockReturnValue(mockChain);
+    limitMock.mockReturnValue(mockChain);
+    populateMock.mockReturnValue(mockChain);
+
+    categoryModel.findOne.mockResolvedValue(mockCategory);
+    productModel.find.mockReturnValue(mockChain);
+    productModel.countDocuments.mockResolvedValue(5);
+
+    req.params = { slug: "test-category", page: "5" };
+    await productCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const sentData = res.send.mock.calls[0][0];
+    expect(sentData.success).toBe(true);
+    expect(sentData.products).toEqual([]);
   });
 
   it("should handle errors in fetching products by category (category)", async () => {
@@ -387,16 +499,23 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   it("should handle errors in fetching products by category (product)", async () => {
     const mockError = new Error("Database error");
 
-    const populateMock = jest.fn().mockRejectedValue(mockError);
+    const selectMock = jest.fn().mockReturnThis();
+    const skipMock = jest.fn().mockReturnThis();
+    const limitMock = jest.fn().mockReturnThis();
+    const sortMock = jest.fn().mockRejectedValue(mockError);
+
     categoryModel.findOne.mockResolvedValue({ _id: "456", name: "Test Category", slug: "test-category" });
     productModel.find.mockReturnValue({
-      populate: populateMock,
+      select: selectMock,
+      skip: skipMock,
+      limit: limitMock,
+      populate: jest.fn().mockReturnThis(),
+      sort: sortMock,
     });
 
-    req.params.slug = "test-category";
+    req.params = { slug: "test-category", page: "1" };
     await productCategoryController(req, res);
 
-    expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "test-category" });
     expect(res.status).toHaveBeenCalledWith(400);
     const sentData = res.send.mock.calls[0][0];
     expect(sentData.success).toBe(false);

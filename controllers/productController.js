@@ -349,9 +349,20 @@ export const productCategoryController = async (req, res) => {
       });
     }
 
-    const products = await productModel.find({ category }).populate("category");
+    const perPage = 3;
+    const page = req.params.page ? req.params.page : 1;
+    
+    const products = await productModel
+      .find({ category })
+      .select("-photo")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .populate("category")
+      .sort({ createdAt: -1 });
 
-    if (products.length === 0) {
+    const total = await productModel.countDocuments({ category });
+
+    if (products.length === 0 && page === 1) {
       return res.status(404).send({
         success: false,
         message: "No products found in this category",
@@ -363,6 +374,7 @@ export const productCategoryController = async (req, res) => {
       message: "Products by category fetched successfully",
       category,
       products,
+      total,
     });
   } catch (error) {
     console.log(error);
