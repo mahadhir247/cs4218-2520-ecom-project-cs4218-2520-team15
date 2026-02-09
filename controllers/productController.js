@@ -315,13 +315,6 @@ export const relatedProductController = async (req, res) => {
       .select("-photo")
       .limit(3)
       .populate("category");
-    
-    if (products.length === 0) {
-      return res.status(404).send({
-        success: false,
-        message: "No related products found",
-      });
-    }
 
     res.status(200).send({
       success: true,

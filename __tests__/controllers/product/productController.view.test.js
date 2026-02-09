@@ -239,7 +239,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     expect(sentData.products).toEqual(mockProducts);
   });
 
-  it("should handle error when no related products are found", async () => {
+  it("should have no error when no related products are found", async () => {
     const selectMock = jest.fn().mockReturnThis();
     const limitMock = jest.fn().mockReturnThis();
     const populateMock = jest.fn().mockResolvedValue([]);
@@ -261,10 +261,10 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     expect(limitMock).toHaveBeenCalledWith(3);
     expect(populateMock).toHaveBeenCalledWith("category");
 
-    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.status).toHaveBeenCalledWith(200);
     const sentData = res.send.mock.calls[0][0];
-    expect(sentData.success).toBe(false);
-    expect(sentData.message).toBe("No related products found");
+    expect(sentData.success).toBe(true);
+    expect(sentData.message).toBe("Related products fetched successfully");
   });
 
   it("should handle errors in fetching related products", async () => {
