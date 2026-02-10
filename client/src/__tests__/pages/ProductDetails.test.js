@@ -357,4 +357,36 @@ describe("Product Details Page", () => {
       );
     });
   });
+
+  it("does not fetch product when slug is undefined", async () => {
+    useParams.mockReturnValue({ slug: undefined });
+
+    await act(async () => {renderProductDetails()});
+
+    expect(axios.get).not.toHaveBeenCalled();
+  });
+
+  // ============================================================
+  // Empty State Handling
+  // ============================================================
+  it("handles non-existent product", async () => {
+    useParams.mockReturnValue({ slug: "nonexistent-product" });
+
+    axios.get.mockResolvedValueOnce({ data: { product: {} } });
+    axios.get.mockResolvedValueOnce({ data: { products: [] } });
+
+    await act(async () => {renderProductDetails()});
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        "/api/v1/product/get-product/nonexistent-product"
+      );
+    }); 
+
+    expect(screen.getByText("Product Details")).toBeInTheDocument();
+    expect(screen.getByText(/Name :/i)).toBeInTheDocument();
+    expect(screen.getByText(/Description :/i)).toBeInTheDocument();
+    expect(screen.getByText(/Price :/i)).toBeInTheDocument();
+    expect(screen.getByText(/Category :/i)).toBeInTheDocument();
+  });
 });
