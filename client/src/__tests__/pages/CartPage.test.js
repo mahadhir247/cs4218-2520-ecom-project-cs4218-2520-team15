@@ -126,7 +126,6 @@ describe("CartPage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("drop-in")).toBeInTheDocument();
     });
-
     expect(screen.getByText("Make Payment")).toBeInTheDocument();
   });
 
@@ -135,35 +134,30 @@ describe("CartPage", () => {
       { _id: "1", name: "Item 1", description: "First item description", price: 10 },
     ];
     const mockSetCart = jest.fn();
-    useAuth.mockReturnValue([
-      { user: { name: "Test User", address: "123 Main St" }, token: "token-123" },
-      jest.fn(),
-    ]);
-    useCart.mockReturnValue([cartItems, mockSetCart]);
-
     const mockInstance = {
       requestPaymentMethod: jest.fn().mockResolvedValue({
         nonce: "fake-nonce-from-braintree",
       }),
     };
-
+    useAuth.mockReturnValue([
+      { user: { name: "Test User", address: "123 Main St" }, token: "token-123" },
+      jest.fn(),
+    ]);
+    useCart.mockReturnValue([cartItems, mockSetCart]);
     axios.post.mockResolvedValue({ data: { success: true } });
 
     await act(async () => {
       render(<CartPage />);
     });
-
     await waitFor(() => {
       expect(screen.getByTestId("drop-in")).toBeInTheDocument();
     });
-
     await act(async () => {
       mockInstanceCallback(mockInstance);
     });
 
     const paymentButton = screen.getByText("Make Payment");
-    expect(paymentButton).not.toBeDisabled();
-
+    expect(paymentButton).toBeEnabled();
     await act(async () => {
       fireEvent.click(paymentButton);
     });
@@ -186,30 +180,26 @@ describe("CartPage", () => {
     const cartItems = [
       { _id: "1", name: "Item 1", description: "First item description", price: 10 },
     ];
+    const mockInstance = {
+      requestPaymentMethod: jest.fn().mockRejectedValue(new Error("Payment failed")),
+    };
     useAuth.mockReturnValue([
       { user: { name: "Test User", address: "123 Main St" }, token: "token-123" },
       jest.fn(),
     ]);
     useCart.mockReturnValue([cartItems, jest.fn()]);
 
-    const mockInstance = {
-      requestPaymentMethod: jest.fn().mockRejectedValue(new Error("Payment failed")),
-    };
-
     await act(async () => {
       render(<CartPage />);
     });
-
     await waitFor(() => {
       expect(screen.getByTestId("drop-in")).toBeInTheDocument();
     });
-
     await act(async () => {
       mockInstanceCallback(mockInstance);
     });
 
     const paymentButton = screen.getByText("Make Payment");
-
     await act(async () => {
       fireEvent.click(paymentButton);
     });
@@ -218,7 +208,6 @@ describe("CartPage", () => {
       expect(mockInstance.requestPaymentMethod).toHaveBeenCalled();
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
     });
-
     consoleLogSpy.mockRestore();
   });
 
@@ -238,8 +227,9 @@ describe("CartPage", () => {
 
     const updateButtons = screen.getAllByText("Update Address");
     expect(updateButtons[0]).toBeInTheDocument();
-    
+
     fireEvent.click(updateButtons[0]);
+
     expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/profile");
   });
 
@@ -258,6 +248,7 @@ describe("CartPage", () => {
     expect(loginButton).toBeInTheDocument();
 
     fireEvent.click(loginButton);
+
     expect(mockNavigate).toHaveBeenCalledWith("/login", { state: "/cart" });
   });
 
@@ -280,6 +271,7 @@ describe("CartPage", () => {
 
     const updateButton = screen.getByText("Update Address");
     fireEvent.click(updateButton);
+
     expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/profile");
   });
 
@@ -296,16 +288,15 @@ describe("CartPage", () => {
     await act(async () => {
       render(<CartPage />);
     });
-
     await waitFor(() => {
       expect(screen.getByTestId("drop-in")).toBeInTheDocument();
     });
-
     await act(async () => {
       mockInstanceCallback({ requestPaymentMethod: jest.fn() });
     });
 
     const paymentButton = screen.getByText("Make Payment");
+
     expect(paymentButton).toBeDisabled();
   });
 
