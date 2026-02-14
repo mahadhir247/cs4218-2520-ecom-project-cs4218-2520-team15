@@ -1,4 +1,4 @@
-import { forgotPasswordController, loginController, registerController } from "../../controllers/authController";
+import { forgotPasswordController, loginController, registerController, testController } from "../../controllers/authController";
 import userModel from "../../models/userModel.js";
 import { hashPassword, comparePassword } from "../../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
@@ -375,12 +375,40 @@ describe("Auth Controller Test", () => {
             expect(res.send).toHaveBeenCalledWith(
                 expect.objectContaining({ 
                     success: false, 
-                    message: "Something went wrong"
+                    message: "Error in resetting password"
                 })
             );
 
             userModel.findOne.mockReset();
             console.log.mockRestore();
         })
+    });
+
+    describe("testController", () => {
+        it("should successfully return protected routes", async () => {
+            await testController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({ success: true, message: "Protected Routes working" });
+        });
+
+        it("should return 500 if internal error is thrown", async () => {
+            res.send.mockImplementationOnce(() => { throw mockError });
+            jest.spyOn(global.console, 'log').mockImplementation(() => {});
+            
+            await testController(req, res);
+            
+            expect(console.log).toHaveBeenCalledWith(mockError);
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith(
+                expect.objectContaining({ 
+                    success: false, 
+                    message: "Error in protected route"
+                })
+            );
+
+            res.send.mockReset();
+            console.log.mockRestore();
+        });
     });
 });
