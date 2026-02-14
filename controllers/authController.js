@@ -259,7 +259,6 @@ export const orderStatusController = async (req, res) => {
 // get all users (admin)
 export const getAllUsersController = async (req, res) => {
   try {
-    // exclude sensitive fields
     const users = await userModel.find({}).select("-password -answer");
     res.json(users);
   } catch (error) {

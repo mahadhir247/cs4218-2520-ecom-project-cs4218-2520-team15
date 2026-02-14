@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../../components/Layout";
 import AdminMenu from "../../components/AdminMenu";
+// import Spinner from "../../components/Spinner";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -53,13 +54,13 @@ const Users = () => {
                           <td>{idx + 1}</td>
                           <td>{u.name}</td>
                           <td>{u.email}</td>
-                          <td>{u.phone || "-"}</td>
+                          <td>{u.phone}</td>
                           <td>{u.role === 0 ? "User" : "Admin"}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={6}>No users found</td>
+                        <td colSpan={5}>No users found</td>
                       </tr>
                     )}
                   </tbody>
