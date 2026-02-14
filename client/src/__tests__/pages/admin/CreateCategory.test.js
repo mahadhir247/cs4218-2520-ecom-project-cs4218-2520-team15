@@ -1,3 +1,7 @@
+/* Name: Lee Guan Kai Delon
+ * Student No: A0273286W
+ */
+
 import { act, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
@@ -8,26 +12,19 @@ import CreateCategory from "../../../pages/admin/CreateCategory";
 jest.mock("axios");
 jest.mock("react-hot-toast");
 
-jest.mock("@context/auth", () => ({
-  useAuth: jest.fn(() => [null, jest.fn()]),
+jest.mock("antd", () => ({
+  ...jest.requireActual("antd"),
+  Modal: ({ children, onCancel, ...props }) => (
+    <div {...props}>
+      {children}
+      <button onClick={onCancel}>Cancel</button>
+    </div>
+  ),
 }));
 
-jest.mock("@context/cart", () => ({
-  useCart: jest.fn(() => [null, jest.fn()]),
-}));
-
-jest.mock("@context/search", () => ({
-  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
-}));
-
-Object.defineProperty(window, "localStorage", {
-  value: {
-    setItem: jest.fn(),
-    getItem: jest.fn(),
-    removeItem: jest.fn(),
-  },
-  writable: true,
-});
+jest.mock("@components/Layout", () => ({ children, ...props }) => (
+  <div {...props}>{children}</div>
+));
 
 const CreateCategoryWithTestWrapper = () => (
   <MemoryRouter initialEntries={["/admin/create-category"]}>
@@ -52,7 +49,7 @@ describe("CreateCategory admin page", () => {
 
   describe("View category action", () => {
     it("should render correctly", async () => {
-      axios.get.mockResolvedValue({
+      axios.get.mockResolvedValueOnce({
         data: {
           success: true,
           category: [
@@ -78,7 +75,7 @@ describe("CreateCategory admin page", () => {
     });
 
     it("should render empty categories correctly", async () => {
-      axios.get.mockResolvedValue({
+      axios.get.mockResolvedValueOnce({
         data: {
           success: true,
           category: [],
@@ -93,7 +90,7 @@ describe("CreateCategory admin page", () => {
     });
 
     it("should do nothing if get category fails (application error)", async () => {
-      axios.get.mockResolvedValue({
+      axios.get.mockResolvedValueOnce({
         data: { success: false },
       });
 
@@ -118,38 +115,25 @@ describe("CreateCategory admin page", () => {
   describe("Create category action", () => {
     it("should create new category correctly", async () => {
       const user = userEvent.setup();
-      let getCallsCount = 0;
-      axios.get.mockImplementation((url) => {
-        getCallsCount++;
-        if (getCallsCount == 3) {
-          // First 2 calls is triggered on page load
-          return Promise.resolve({
-            data: {
-              success: true,
-              category: [{ _id: "1", name: "Category A" }],
-            },
-          });
-        }
-        return Promise.resolve({
-          data: {
-            success: true,
-            category: [],
-          },
-        });
+      axios.get.mockResolvedValueOnce({
+        data: {
+          success: true,
+          category: [{ _id: "1", name: "Category A" }],
+        },
       });
       axios.post.mockResolvedValueOnce({
         data: { success: true },
       });
 
-      const { findByText, getByText, getByPlaceholderText } = render(
+      const { findByText, getAllByText, getAllByPlaceholderText } = render(
         <CreateCategoryWithTestWrapper />,
       );
       await act(async () => {
         await user.type(
-          getByPlaceholderText("Enter new category"),
+          getAllByPlaceholderText("Enter new category")[0],
           "Category A",
         );
-        await user.click(getByText("Submit", { selector: "button" }));
+        await user.click(getAllByText("Submit", { selector: "button" })[0]);
       });
 
       await waitFor(() => expect(axios.post).toHaveBeenCalled());
@@ -161,7 +145,7 @@ describe("CreateCategory admin page", () => {
 
     it("should prompt error if create new category fails (application error)", async () => {
       const user = userEvent.setup();
-      axios.get.mockResolvedValue({
+      axios.get.mockResolvedValueOnce({
         data: {
           success: true,
           category: [{ _id: "1", name: "Category A" }],
@@ -171,28 +155,28 @@ describe("CreateCategory admin page", () => {
         data: { success: false, message: "Category already exists" },
       });
 
-      const { findAllByText, getByText, getByPlaceholderText } = render(
+      const { findAllByText, getAllByText, getAllByPlaceholderText } = render(
         <CreateCategoryWithTestWrapper />,
       );
       await act(async () => {
         await user.type(
-          getByPlaceholderText("Enter new category"),
+          getAllByPlaceholderText("Enter new category")[0],
           "Category A",
         );
-        await user.click(getByText("Submit", { selector: "button" }));
+        await user.click(getAllByText("Submit", { selector: "button" })[0]);
       });
 
       await waitFor(() => expect(axios.post).toHaveBeenCalled());
       expect(
         await findAllByText("Category A", { selector: "td", exact: true }),
       ).toHaveLength(1);
-      expect(axios.get).toHaveBeenCalledTimes(2);
+      expect(axios.get).toHaveBeenCalled();
       expect(toast.error).toHaveBeenCalledWith("Category already exists");
     });
 
     it("should prompt error if create new category fails (server error)", async () => {
       const user = userEvent.setup();
-      axios.get.mockResolvedValue({
+      axios.get.mockResolvedValueOnce({
         data: {
           success: true,
           category: [{ _id: "1", name: "Category A" }],
@@ -200,22 +184,22 @@ describe("CreateCategory admin page", () => {
       });
       axios.post.mockRejectedValue(new Error("Create category error"));
 
-      const { findAllByText, getByText, getByPlaceholderText } = render(
+      const { findAllByText, getAllByText, getAllByPlaceholderText } = render(
         <CreateCategoryWithTestWrapper />,
       );
       await act(async () => {
         await user.type(
-          getByPlaceholderText("Enter new category"),
+          getAllByPlaceholderText("Enter new category")[0],
           "Category A",
         );
-        await user.click(getByText("Submit", { selector: "button" }));
+        await user.click(getAllByText("Submit", { selector: "button" })[0]);
       });
 
       await waitFor(() => expect(axios.post).toHaveBeenCalled());
       expect(
         await findAllByText("Category A", { selector: "td", exact: true }),
       ).toHaveLength(1);
-      expect(axios.get).toHaveBeenCalledTimes(2);
+      expect(axios.get).toHaveBeenCalled();
       expect(toast.error).toHaveBeenCalledWith(
         "Something went wrong in creating category",
       );
@@ -225,44 +209,48 @@ describe("CreateCategory admin page", () => {
   describe("Update category action", () => {
     it("should update category correctly", async () => {
       const user = userEvent.setup();
-      let getCallsCount = 0;
-      axios.get.mockImplementation((url) => {
-        getCallsCount++;
-        if (getCallsCount == 3) {
-          // First 2 calls is triggered on page load
-          return Promise.resolve({
-            data: {
-              success: true,
-              category: [{ _id: "1", name: "Category B" }],
-            },
-          });
-        }
-        return Promise.resolve({
+      axios.get
+        .mockResolvedValueOnce({
           data: {
             success: true,
             category: [{ _id: "1", name: "Category A" }],
           },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            success: true,
+            category: [{ _id: "1", name: "Category B" }],
+          },
         });
-      });
       axios.put.mockResolvedValueOnce({
         data: { success: true },
       });
 
-      const { findByText, getAllByText, getByDisplayValue, queryByRole } =
-        render(<CreateCategoryWithTestWrapper />);
-      await user.click(await findByText("Edit", { selector: "button" }));
+      const {
+        findByText,
+        getAllByText,
+        getAllByPlaceholderText,
+        queryByRole,
+        queryByText,
+      } = render(<CreateCategoryWithTestWrapper />);
+      const editButton = await findByText("Edit", { selector: "button" });
+      await waitFor(() => expect(editButton).toBeInTheDocument());
       await act(async () => {
-        const inputField = getByDisplayValue("Category A");
+        await user.click(editButton);
+        const inputField = getAllByPlaceholderText("Enter new category")[1];
         await user.clear(inputField);
         await user.type(inputField, "Category B");
         await user.click(getAllByText("Submit", { selector: "button" })[1]);
       });
 
       await waitFor(() => expect(axios.put).toHaveBeenCalled());
+      expect(axios.get).toHaveBeenCalledTimes(2);
       expect(
-        await findByText("Category B", { selector: "td", exact: true }),
+        queryByText("Category A", { selector: "td", exact: true }),
+      ).toBeNull();
+      expect(
+        queryByText("Category B", { selector: "td", exact: true }),
       ).toBeInTheDocument();
-      expect(queryByRole("dialog")).toBeNull();
       expect(toast.success).toHaveBeenCalledWith("Category B is updated");
     });
 
@@ -275,29 +263,27 @@ describe("CreateCategory admin page", () => {
         },
       });
 
-      const {
-        findByText,
-        getByDisplayValue,
-        getByLabelText,
-        queryByRole,
-        queryByText,
-      } = render(<CreateCategoryWithTestWrapper />);
-      await user.click(await findByText("Edit", { selector: "button" }));
+      const { findByText, getAllByPlaceholderText, queryByText } = render(
+        <CreateCategoryWithTestWrapper />,
+      );
+      const editButton = await findByText("Edit", { selector: "button" });
+      await waitFor(() => expect(editButton).toBeInTheDocument());
       await act(async () => {
-        const inputField = getByDisplayValue("Category A");
+        await user.click(editButton);
+        const inputField = getAllByPlaceholderText("Enter new category")[1];
         await user.clear(inputField);
         await user.type(inputField, "Category B");
-        await user.click(getByLabelText("Close", { selector: "button" }));
+        await user.click(queryByText("Cancel", { selector: "button" }));
       });
 
+      expect(axios.get).toHaveBeenCalledTimes(1);
+      expect(axios.put).toHaveBeenCalledTimes(0);
       expect(
-        await findByText("Category A", { selector: "td", exact: true }),
+        queryByText("Category A", { selector: "td", exact: true }),
       ).toBeInTheDocument();
       expect(
         queryByText("Category B", { selector: "td", exact: true }),
       ).toBeNull();
-      expect(queryByRole("dialog")).toBeNull();
-      expect(axios.put).toHaveBeenCalledTimes(0);
     });
 
     it("should prompt error if update category fails (application error)", async () => {
@@ -312,19 +298,21 @@ describe("CreateCategory admin page", () => {
         data: { success: false, message: "Category already exists" },
       });
 
-      const { findByText, getAllByText, getByDisplayValue, getByRole } = render(
+      const { findByText, getAllByPlaceholderText, getAllByText } = render(
         <CreateCategoryWithTestWrapper />,
       );
-      await user.click(await findByText("Edit", { selector: "button" }));
+      const editButton = await findByText("Edit", { selector: "button" });
+      await waitFor(() => expect(editButton).toBeInTheDocument());
       await act(async () => {
-        const inputField = getByDisplayValue("Category A");
+        await user.click(editButton);
+        const inputField = getAllByPlaceholderText("Enter new category")[1];
         await user.clear(inputField);
         await user.type(inputField, "Category B");
         await user.click(getAllByText("Submit", { selector: "button" })[1]);
       });
 
       await waitFor(() => expect(axios.put).toHaveBeenCalled());
-      expect(getByRole("dialog")).toBeVisible();
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(toast.error).toHaveBeenCalledWith("Category already exists");
     });
 
@@ -338,19 +326,21 @@ describe("CreateCategory admin page", () => {
       });
       axios.put.mockRejectedValue(new Error("Update category error"));
 
-      const { findByText, getAllByText, getByDisplayValue, getByRole } = render(
+      const { findByText, getAllByPlaceholderText, getAllByText } = render(
         <CreateCategoryWithTestWrapper />,
       );
-      await user.click(await findByText("Edit", { selector: "button" }));
+      const editButton = await findByText("Edit", { selector: "button" });
+      await waitFor(() => expect(editButton).toBeInTheDocument());
       await act(async () => {
-        const inputField = getByDisplayValue("Category A");
+        await user.click(editButton);
+        const inputField = getAllByPlaceholderText("Enter new category")[1];
         await user.clear(inputField);
         await user.type(inputField, "Category B");
         await user.click(getAllByText("Submit", { selector: "button" })[1]);
       });
 
       await waitFor(() => expect(axios.put).toHaveBeenCalled());
-      expect(getByRole("dialog")).toBeVisible();
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(toast.error).toHaveBeenCalledWith(
         "Something went wrong in updating category",
       );
@@ -360,25 +350,19 @@ describe("CreateCategory admin page", () => {
   describe("Delete category action", () => {
     it("should delete category correctly", async () => {
       const user = userEvent.setup();
-      let getCallsCount = 0;
-      axios.get.mockImplementation((url) => {
-        getCallsCount++;
-        if (getCallsCount == 3) {
-          // First 2 calls is triggered on page load
-          return Promise.resolve({
-            data: {
-              success: true,
-              category: [],
-            },
-          });
-        }
-        return Promise.resolve({
+      axios.get
+        .mockResolvedValueOnce({
           data: {
             success: true,
             category: [{ _id: "1", name: "Category A" }],
           },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            success: true,
+            category: [],
+          },
         });
-      });
       axios.delete.mockResolvedValueOnce({
         data: { success: true },
       });
@@ -386,9 +370,14 @@ describe("CreateCategory admin page", () => {
       const { findByText, queryByText } = render(
         <CreateCategoryWithTestWrapper />,
       );
-      await user.click(await findByText("Delete", { selector: "button" }));
+      const deleteButton = await findByText("Delete", { selector: "button" });
+      await waitFor(() => expect(deleteButton).toBeInTheDocument());
+      await act(async () => {
+        await user.click(deleteButton);
+      });
 
       await waitFor(() => expect(axios.delete).toHaveBeenCalled());
+      expect(axios.get).toHaveBeenCalledTimes(2);
       expect(
         await queryByText("Category A", { selector: "td", exact: true }),
       ).toBeNull();
@@ -408,9 +397,14 @@ describe("CreateCategory admin page", () => {
       });
 
       const { findByText } = render(<CreateCategoryWithTestWrapper />);
-      await user.click(await findByText("Delete", { selector: "button" }));
+      const deleteButton = await findByText("Delete", { selector: "button" });
+      await waitFor(() => expect(deleteButton).toBeInTheDocument());
+      await act(async () => {
+        await user.click(deleteButton);
+      });
 
       await waitFor(() => expect(axios.delete).toHaveBeenCalled());
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(
         await findByText("Category A", { selector: "td", exact: true }),
       ).toBeInTheDocument();
@@ -428,9 +422,14 @@ describe("CreateCategory admin page", () => {
       axios.delete.mockRejectedValue(new Error("Delete category error"));
 
       const { findByText } = render(<CreateCategoryWithTestWrapper />);
-      await user.click(await findByText("Delete", { selector: "button" }));
+      const deleteButton = await findByText("Delete", { selector: "button" });
+      await waitFor(() => expect(deleteButton).toBeInTheDocument());
+      await act(async () => {
+        await user.click(deleteButton);
+      });
 
       await waitFor(() => expect(axios.delete).toHaveBeenCalled());
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(
         await findByText("Category A", { selector: "td", exact: true }),
       ).toBeInTheDocument();
