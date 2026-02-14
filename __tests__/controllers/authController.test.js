@@ -10,6 +10,7 @@ jest.mock("jsonwebtoken");
 
 describe("Auth Controller Test", () => {
     let req, res;
+    const mockError = new Error("mock-error");
 
     beforeEach(() => {
         req = {
@@ -38,7 +39,8 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
-            expect(res.send).toHaveBeenCalledWith({ error: "Name is Required" })
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith({ message: "Name is Required" })
         });
 
         it("should return error if email is missing", async () => {
@@ -53,6 +55,7 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({ message: "Email is Required" })
         });
 
@@ -68,6 +71,7 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({ message: "Password is Required" })
         });
 
@@ -83,6 +87,7 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({ message: "Phone no is Required" })
         });
 
@@ -98,6 +103,7 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({ message: "Address is Required" })
         });
 
@@ -113,6 +119,7 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({ message: "Answer is Required" })
         });
 
@@ -129,7 +136,7 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({ success: false, message: "Already Register please login" })
         });
 
@@ -153,7 +160,8 @@ describe("Auth Controller Test", () => {
         });
 
         it("should return 500 if internal error is thrown", async () => {
-            hashPassword.mockImplementation(() => { throw new Error("mock-error"); });
+            hashPassword.mockImplementation(() => { throw mockError; });
+            jest.spyOn(global.console, 'log').mockImplementation(() => {});
             req.body = {
                 name: 'Test',
                 email: 'test@gmail.com',
@@ -166,6 +174,7 @@ describe("Auth Controller Test", () => {
 
             await registerController(req, res);
 
+            expect(console.log).toHaveBeenCalledWith(mockError);
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith(
                 expect.objectContaining({ 
@@ -175,6 +184,7 @@ describe("Auth Controller Test", () => {
             );
 
             hashPassword.mockReset();
+            console.log.mockRestore();
         });
     });
 
@@ -226,7 +236,7 @@ describe("Auth Controller Test", () => {
 
             await loginController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid Password" });
         });
 
@@ -258,10 +268,12 @@ describe("Auth Controller Test", () => {
             }
             userModel.findOne.mockResolvedValue({ email: 'test@gmail.com' });
             comparePassword.mockResolvedValue(true);
-            JWT.sign.mockImplementation(() => { throw new Error("mock-error") });
+            JWT.sign.mockImplementation(() => { throw mockError });
+            jest.spyOn(global.console, 'log').mockImplementation(() => {});
 
             await loginController(req, res);
 
+            expect(console.log).toHaveBeenCalledWith(mockError);
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith(
                 expect.objectContaining({ 
@@ -271,6 +283,7 @@ describe("Auth Controller Test", () => {
             );
 
             JWT.sign.mockReset();
+            console.log.mockRestore();
         });
     });
 
@@ -352,10 +365,12 @@ describe("Auth Controller Test", () => {
                 answer: 'test',
                 newPassword: 'test'
             }
-            userModel.findOne.mockImplementation(() => { throw new Error("mock-error") });
+            userModel.findOne.mockImplementation(() => { throw mockError });
+            jest.spyOn(global.console, 'log').mockImplementation(() => {});
 
             await forgotPasswordController(req, res);
 
+            expect(console.log).toHaveBeenCalledWith(mockError);
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith(
                 expect.objectContaining({ 
@@ -365,6 +380,7 @@ describe("Auth Controller Test", () => {
             );
 
             userModel.findOne.mockReset();
+            console.log.mockRestore();
         })
     });
 });
