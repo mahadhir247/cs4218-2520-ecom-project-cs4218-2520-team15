@@ -1,11 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import Categories from "../pages/Categories";
-import useCategory from "../hooks/useCategory";
+import Categories from "../../pages/Categories";
+import useCategory from "../../hooks/useCategory";
 
-jest.mock("../hooks/useCategory");
-jest.mock("../components/Layout", () => {
+jest.mock("../../hooks/useCategory");
+jest.mock("../../components/Layout", () => {
   return function MockLayout({ children, title }) {
     return (
       <div data-testid="layout" data-title={title}>
