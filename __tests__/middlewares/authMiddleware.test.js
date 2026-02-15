@@ -93,7 +93,7 @@ describe("authMiddleware Tests", () => {
             expect(next).toHaveBeenCalled();
         });
 
-        it("should return 501 if internal error is thrown", async() => {
+        it("should return 500 if internal error is thrown", async() => {
             const mockError = new Error("mock-error");
             userModel.findById.mockImplementation(() => { throw mockError });
 

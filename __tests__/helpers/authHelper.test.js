@@ -4,6 +4,10 @@ import { hashPassword, comparePassword } from "../../helpers/authHelper";
 jest.mock("bcrypt");
 
 describe("authHelper Tests", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     const mockError = new Error("mock-error");
     
     describe("hashPassword", () => {
@@ -33,10 +37,12 @@ describe("authHelper Tests", () => {
     describe("comparePassword", () => {
         it("should call compare with correct arguments", async () => {
             const spy = jest.spyOn(bcrypt, 'compare');
-            
-            await comparePassword("password", "hashPassword");
+            bcrypt.compare.mockResolvedValueOnce(true);
+
+            const result = await comparePassword("password", "hashPassword");
 
             expect(spy).toHaveBeenCalledWith("password", "hashPassword");
+            expect(result).toBe(true);
             spy.mockRestore();
         });
         
