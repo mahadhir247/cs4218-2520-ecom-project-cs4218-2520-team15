@@ -385,6 +385,7 @@ export const braintreeTokenController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).send(error);
   }
 };
 
@@ -404,9 +405,9 @@ export const brainTreePaymentController = async (req, res) => {
           submitForSettlement: true,
         },
       },
-      function (error, result) {
+      async function (error, result) {
         if (result) {
-          const order = new orderModel({
+          const order = await new orderModel({
             products: cart,
             payment: result,
             buyer: req.user._id,
@@ -419,5 +420,6 @@ export const brainTreePaymentController = async (req, res) => {
     );
   } catch (error) {
     console.log(error);
+    res.status(500).send(error);
   }
 };

@@ -34,14 +34,25 @@ const Profile = () => {
         phone,
         address,
       });
-      if (data?.errro) {
+      if (data?.error) {
         toast.error(data?.error);
       } else {
-        setAuth({ ...auth, user: data?.updatedUser });
-        let ls = localStorage.getItem("auth");
-        ls = JSON.parse(ls);
-        ls.user = data.updatedUser;
-        localStorage.setItem("auth", JSON.stringify(ls));
+        // use functional update to avoid stale closure issues
+        setAuth((prev) => ({ ...prev, user: data?.updatedUser }));
+
+        // guard localStorage parsing in case the stored value is missing or invalid
+        try {
+          const raw = localStorage.getItem("auth");
+          const ls = raw ? JSON.parse(raw) : {};
+          ls.user = data.updatedUser;
+          localStorage.setItem("auth", JSON.stringify(ls));
+        } catch (err) {
+          // if parsing fails, overwrite with a minimal auth object
+          localStorage.setItem(
+            "auth",
+            JSON.stringify({ user: data.updatedUser })
+          );
+        }
         toast.success("Profile Updated Successfully");
       }
     } catch (error) {
@@ -66,7 +77,7 @@ const Profile = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="profile-name"
                     placeholder="Enter Your Name"
                     autoFocus
                   />
@@ -77,8 +88,8 @@ const Profile = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
-                    placeholder="Enter Your Email "
+                    id="profile-email"
+                    placeholder="Enter Your Email"
                     disabled
                   />
                 </div>
@@ -88,7 +99,7 @@ const Profile = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="form-control"
-                    id="exampleInputPassword1"
+                    id="profile-password"
                     placeholder="Enter Your Password"
                   />
                 </div>
@@ -98,7 +109,7 @@ const Profile = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="profile-phone"
                     placeholder="Enter Your Phone"
                   />
                 </div>
@@ -108,7 +119,7 @@ const Profile = () => {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="profile-address"
                     placeholder="Enter Your Address"
                   />
                 </div>
