@@ -11,9 +11,6 @@ jest.mock("@context/auth", () => ({
 jest.mock("@components/Spinner", () => ({ path }) => (
   <div>spinner-mock</div>
 ));
-jest.mock("mongoose", () => ({
-    set: jest.fn(),
-}));
 
 function renderPrivateRoute() {
     return render(
@@ -28,10 +25,15 @@ function renderPrivateRoute() {
 }
 
 describe("Private tests", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     it("should render spinner when there is no auth token", async () => {
         const { getByText } = renderPrivateRoute();
 
         expect(getByText("spinner-mock")).toBeInTheDocument();
+        expect(axios.get).not.toHaveBeenCalled();
     });
 
     it("should render spinner if auth token is not ok", async () => {
@@ -42,8 +44,8 @@ describe("Private tests", () => {
 
         await waitFor(() => {
             expect(getByText("spinner-mock")).toBeInTheDocument();
+            expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/user-auth");
         });
-        expect(axios.get).toHaveBeenCalled();
     });
 
     it("should render outlet child if auth token is ok", async () => {
@@ -54,7 +56,7 @@ describe("Private tests", () => {
 
         await waitFor(() => {
             expect(getByText("child-element")).toBeInTheDocument();
+            expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/user-auth");
         });
-        expect(axios.get).toHaveBeenCalled();
     });
 });
