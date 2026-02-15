@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import axios from "axios";
-import useCategory from "./useCategory";
+import useCategory from "../../hooks/useCategory.js";
 
 jest.mock("axios");
 
