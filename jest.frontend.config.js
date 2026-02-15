@@ -14,17 +14,21 @@ export default {
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
     "\\.(css|scss)$": "identity-obj-proxy",
+    "^@components/(.*)$": "<rootDir>/client/src/components/$1",
+    "^@context/(.*)$": "<rootDir>/client/src/context/$1",
+    "^@pages/(.*)$": "<rootDir>/client/src/pages/$1",
   },
 
   // ignore all node_modules except styleMock (needed for css imports)
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/pages/Auth/*.test.js", "<rootDir>/client/src/hooks/*.test.js"],
+  testMatch: ["<rootDir>/client/src/__tests__/**/*.test.js"],
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/Auth/**"],
+  collectCoverageFrom: ["client/src/**"],
+  coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/client/src/_site/"],
   coverageThreshold: {
     global: {
       lines: 100,

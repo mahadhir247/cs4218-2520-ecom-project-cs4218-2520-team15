@@ -1,5 +1,3 @@
-import React from "react";
-
 const CategoryForm = ({ handleSubmit, value, setValue }) => {
   return (
     <>
@@ -14,7 +12,7 @@ const CategoryForm = ({ handleSubmit, value, setValue }) => {
           />
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary" disabled={!value}>
           Submit
         </button>
       </form>
