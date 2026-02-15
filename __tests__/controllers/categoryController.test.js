@@ -16,7 +16,7 @@ jest.mock("slugify", () => ({
 import categoryModel from "../../models/categoryModel.js";
 
 import {
-  categoryControlller,
+  categoryController as categoryController,
   singleCategoryController,
 } from "../../controllers/categoryController.js";
 
@@ -27,7 +27,7 @@ function createRes() {
   return res;
 }
 
-describe("categoryControlller", () => {
+describe("categoryController", () => {
   let res;
 
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe("categoryControlller", () => {
 
     categoryModel.find.mockResolvedValue(categories);
 
-    await categoryControlller({}, res);
+    await categoryController({}, res);
 
     expect(categoryModel.find).toHaveBeenCalledWith({});
     expect(res.status).toHaveBeenCalledWith(200);
@@ -57,7 +57,7 @@ describe("categoryControlller", () => {
   test("returns 500 when error occurs", async () => {
     categoryModel.find.mockRejectedValue(new Error("DB crashed"));
 
-    await categoryControlller({}, res);
+    await categoryController({}, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith(
