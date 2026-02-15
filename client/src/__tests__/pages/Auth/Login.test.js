@@ -2,12 +2,19 @@ import "@testing-library/jest-dom/extend-expect";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import Login from "../../../pages/Auth/Login";
+
+const mockNavigate = jest.fn()
 
 // Mocking axios.post
 jest.mock("axios");
 jest.mock("react-hot-toast");
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
 
 jest.mock("@context/auth", () => ({
   useAuth: jest.fn(() => [null, jest.fn()]), // Mock useAuth hook to return null state and a mock function for setAuth
@@ -105,6 +112,22 @@ describe("Login Component", () => {
     });
   });
 
+  it("should navigate to forgot password page when forgot password button is clicked", async () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(getByText("Forgot Password"));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
+    })
+  });
+
   it("should login the user successfully", async () => {
     axios.post.mockResolvedValueOnce({
       data: {
@@ -142,7 +165,12 @@ describe("Login Component", () => {
   });
 
   it("should display error message on failed login", async () => {
-    axios.post.mockRejectedValueOnce({ message: "Invalid credentials" });
+    axios.post.mockResolvedValueOnce({ 
+      data: {
+        success: false,
+        message: "Invalid credentials" 
+      }
+    });
 
     const { getByPlaceholderText, getByText } = render(
       <MemoryRouter initialEntries={["/login"]}>
@@ -161,6 +189,35 @@ describe("Login Component", () => {
     fireEvent.click(getByText("LOGIN"));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(toast.error).toHaveBeenCalledWith("Invalid credentials");
+  });
+
+  it("should display error on internal error", async () => {
+    const mockError = new Error("mockError");
+    axios.post.mockImplementation(() => { throw mockError });
+    jest.spyOn(global.console, 'log').mockImplementation(() => {});
+
+    const { getByPlaceholderText, getByText } = render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(getByPlaceholderText("Enter Your Email"), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Password"), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(getByText("LOGIN"));
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(console.log).toHaveBeenCalledWith(mockError)
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+
+    axios.post.mockRestore();
+    console.log.mockRestore();
   });
 });
