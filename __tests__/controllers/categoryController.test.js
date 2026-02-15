@@ -1,24 +1,24 @@
 import { jest, describe, test, expect, beforeEach } from "@jest/globals";
 
-const mockFindOne = jest.fn();
-const mockFind = jest.fn();
-
-const MockCategoryModel = jest.fn();
-MockCategoryModel.findOne = mockFindOne;
-MockCategoryModel.find = mockFind;
-
-await jest.unstable_mockModule("../../models/categoryModel.js", () => ({
-  default: MockCategoryModel,
+jest.mock("../../models/categoryModel.js", () => ({
+  __esModule: true,
+  default: {
+    find: jest.fn(),
+    findOne: jest.fn(),
+  },
 }));
 
-await jest.unstable_mockModule("slugify", () => ({
+jest.mock("slugify", () => ({
+  __esModule: true,
   default: jest.fn(),
 }));
 
-const {
+import categoryModel from "../../models/categoryModel.js";
+
+import {
   categoryControlller,
   singleCategoryController,
-} = await import("../../controllers/categoryController.js");
+} from "../../controllers/categoryController.js";
 
 function createRes() {
   const res = {};
@@ -40,11 +40,12 @@ describe("categoryControlller", () => {
       { _id: "1", name: "Electronics" },
       { _id: "2", name: "Clothing" },
     ];
-    mockFind.mockResolvedValue(categories);
+
+    categoryModel.find.mockResolvedValue(categories);
 
     await categoryControlller({}, res);
 
-    expect(mockFind).toHaveBeenCalledWith({});
+    expect(categoryModel.find).toHaveBeenCalledWith({});
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
@@ -53,14 +54,17 @@ describe("categoryControlller", () => {
     });
   });
 
-  test("returns 500 when an unexpected error is thrown", async () => {
-    mockFind.mockRejectedValue(new Error("DB crashed"));
+  test("returns 500 when error occurs", async () => {
+    categoryModel.find.mockRejectedValue(new Error("DB crashed"));
 
     await categoryControlller({}, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, message: "Error while getting all categories" })
+      expect.objectContaining({
+        success: false,
+        message: "Error while getting all categories",
+      })
     );
   });
 });
@@ -74,30 +78,41 @@ describe("singleCategoryController", () => {
   });
 
   test("returns single category with 200 on success", async () => {
-    const category = { _id: "1", name: "Electronics", slug: "electronics" };
+    const category = {
+      _id: "1",
+      name: "Electronics",
+      slug: "electronics",
+    };
+
     req = { params: { slug: "electronics" } };
-    mockFindOne.mockResolvedValue(category);
+    categoryModel.findOne.mockResolvedValue(category);
 
     await singleCategoryController(req, res);
 
-    expect(mockFindOne).toHaveBeenCalledWith({ slug: "electronics" });
+    expect(categoryModel.findOne).toHaveBeenCalledWith({
+      slug: "electronics",
+    });
+
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Get Single Category SUccessfully",
+      message: "Get Single Category Successfully",
       category,
     });
   });
 
-  test("returns 500 when an unexpected error is thrown", async () => {
+  test("returns 500 when error occurs", async () => {
     req = { params: { slug: "electronics" } };
-    mockFindOne.mockRejectedValue(new Error("DB crashed"));
+    categoryModel.findOne.mockRejectedValue(new Error("DB crashed"));
 
     await singleCategoryController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, message: "Error While getting Single Category" })
+      expect.objectContaining({
+        success: false,
+        message: "Error While getting Single Category",
+      })
     );
   });
 });
