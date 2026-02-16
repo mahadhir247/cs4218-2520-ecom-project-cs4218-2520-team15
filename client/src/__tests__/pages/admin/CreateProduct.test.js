@@ -72,9 +72,9 @@ describe("CreateProduct admin page", () => {
       const { getByPlaceholderText, getByRole, getByText, queryAllByRole } =
         render(<CreateProduct />);
 
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       expect(getByPlaceholderText("Select a category")).toBeEnabled();
       expect(getByRole("option", { name: "Electronics" })).toBeEnabled();
@@ -97,10 +97,10 @@ describe("CreateProduct admin page", () => {
 
       const { queryAllByRole } = render(<CreateProduct />);
 
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
       });
-      expect(await queryAllByRole("option")).toHaveLength(2);
+      expect(queryAllByRole("option")).toHaveLength(2);
     });
 
     it("should render empty categories on get category fails (application error)", async () => {
@@ -110,10 +110,8 @@ describe("CreateProduct admin page", () => {
 
       const { queryAllByRole } = render(<CreateProduct />);
 
-      await waitFor(async () => {
-        expect(axios.get).toHaveBeenCalled();
-      });
-      expect(await queryAllByRole("option")).toHaveLength(2);
+      await waitFor(() => expect(axios.get).toHaveBeenCalled());
+      expect(queryAllByRole("option")).toHaveLength(2);
     });
 
     it("should prompt error on get category fails (server error)", async () => {
@@ -121,10 +119,8 @@ describe("CreateProduct admin page", () => {
 
       const { queryAllByRole } = render(<CreateProduct />);
 
-      await waitFor(async () => {
-        expect(axios.get).toHaveBeenCalled();
-      });
-      expect(await queryAllByRole("option")).toHaveLength(2);
+      await waitFor(() => expect(axios.get).toHaveBeenCalled());
+      expect(queryAllByRole("option")).toHaveLength(2);
       expect(toast.error).toHaveBeenCalledWith(
         "Something went wrong in getting category",
       );
@@ -149,9 +145,9 @@ describe("CreateProduct admin page", () => {
         getByText,
         queryAllByRole,
       } = render(<CreateProduct />);
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       await act(async () => {
         await user.selectOptions(
@@ -201,9 +197,9 @@ describe("CreateProduct admin page", () => {
         getByText,
         queryAllByRole,
       } = render(<CreateProduct />);
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       await act(async () => {
         await user.selectOptions(
@@ -254,9 +250,9 @@ describe("CreateProduct admin page", () => {
         getByText,
         queryAllByRole,
       } = render(<CreateProduct />);
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       await act(async () => {
         await user.selectOptions(
@@ -303,9 +299,9 @@ describe("CreateProduct admin page", () => {
         getByText,
         queryAllByRole,
       } = render(<CreateProduct />);
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       await act(async () => {
         await user.selectOptions(
@@ -354,9 +350,9 @@ describe("CreateProduct admin page", () => {
       );
 
       const { getByTestId, queryAllByRole } = render(<CreateProduct />);
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       await act(async () => {
         await user.upload(getByTestId("img-upload"), mockFileBelowSizeLimit);
@@ -385,9 +381,9 @@ describe("CreateProduct admin page", () => {
       );
 
       const { getByTestId, queryAllByRole } = render(<CreateProduct />);
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       await act(async () => {
         await user.upload(getByTestId("img-upload"), mockFileOnSizeLimit);
@@ -416,9 +412,9 @@ describe("CreateProduct admin page", () => {
       );
 
       const { getByTestId, queryAllByRole } = render(<CreateProduct />);
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(axios.get).toHaveBeenCalled();
-        expect(await queryAllByRole("option")).toHaveLength(4);
+        expect(queryAllByRole("option")).toHaveLength(4);
       });
       await act(async () => {
         await user.upload(getByTestId("img-upload"), mockFileAboveSizeLimit);
