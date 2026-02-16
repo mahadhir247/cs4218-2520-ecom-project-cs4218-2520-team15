@@ -111,6 +111,7 @@ const CreateProduct = () => {
                 <label className="btn btn-outline-secondary col-md-12">
                   {formValue.photo ? formValue.photo.name : "Upload Photo"}
                   <input
+                    data-testid="img-upload"
                     type="file"
                     name="photo"
                     accept="image/*"
