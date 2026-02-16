@@ -42,7 +42,7 @@ const CreateProduct = () => {
   }, []);
 
   const updateField = (field, value) => {
-    if (field == "photo" && value?.size) {
+    if (field === "photo" && value?.size) {
       if (value.size > 1000000) {
         toast.error("Photo size cannot exceed 1MB");
         return;
@@ -65,6 +65,7 @@ const CreateProduct = () => {
       productData.append("quantity", formValue.quantity);
       productData.append("photo", formValue.photo);
       productData.append("category", formValue.category);
+      productData.append("shipping", formValue.shipping);
       const { data } = await axios.post(
         "/api/v1/product/create-product",
         productData,
