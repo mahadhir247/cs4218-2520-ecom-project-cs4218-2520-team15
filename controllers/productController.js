@@ -365,10 +365,13 @@ export const productCategoryController = async (req, res) => {
 
 //payment gateway api
 //token
-export const braintreeTokenController = async (req, res, gatewayInstance = gateway) => {
+export const braintreeTokenController = async (req, res) => {
   try {
-    if (!gatewayInstance) return res.status(500).send("Braintree not initialized");
-    gatewayInstance.clientToken.generate({}, function (err, response) {
+    if (!gateway) {
+      return res.status(500).send("Braintree not initialized");
+    }
+    
+    gateway.clientToken.generate({}, function (err, response) {
       if (err) {
         res.status(500).send(err);
       } else {
@@ -382,14 +385,18 @@ export const braintreeTokenController = async (req, res, gatewayInstance = gatew
 };
 
 //payment
-export const brainTreePaymentController = async (req, res, gatewayInstance = gateway) => {
+export const brainTreePaymentController = async (req, res) => {
   try {
+    if (!gateway) {
+      return res.status(500).send("Braintree not initialized");
+    }
+    
     const { nonce, cart } = req.body;
     let total = 0;
     cart.map((i) => {
       total += i.price;
     });
-    let newTransaction = gatewayInstance.transaction.sale(
+    let newTransaction = gateway.transaction.sale(
       {
         amount: total,
         paymentMethodNonce: nonce,
