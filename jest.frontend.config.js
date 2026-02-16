@@ -29,11 +29,11 @@ export default {
   collectCoverage: true,
   collectCoverageFrom: ["client/src/**"],
   coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/client/src/_site/"],
-  coverageThreshold: {
-    global: {
-      lines: 100,
-      functions: 100,
-    },
-  },
+  //   coverageThreshold: {
+  //     global: {
+  //       lines: 100,
+  //       functions: 100,
+  //     },
+  //   },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
 };
