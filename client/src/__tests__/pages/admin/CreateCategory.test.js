@@ -36,7 +36,7 @@ const CreateCategoryWithTestWrapper = () => (
 
 describe("CreateCategory admin page", () => {
   beforeAll(() => {
-    jest.spyOn(console, "log").mockImplementation(() => {}); // To silence console.log statements
+    jest.spyOn(console, "log").mockImplementation(() => {});
   });
 
   afterAll(() => {
@@ -226,13 +226,8 @@ describe("CreateCategory admin page", () => {
         data: { success: true },
       });
 
-      const {
-        findByText,
-        getAllByText,
-        getAllByPlaceholderText,
-        queryByRole,
-        queryByText,
-      } = render(<CreateCategoryWithTestWrapper />);
+      const { findByText, getAllByText, getAllByPlaceholderText, queryByText } =
+        render(<CreateCategoryWithTestWrapper />);
       const editButton = await findByText("Edit", { selector: "button" });
       await waitFor(() => expect(editButton).toBeInTheDocument());
       await act(async () => {
@@ -379,7 +374,7 @@ describe("CreateCategory admin page", () => {
       await waitFor(() => expect(axios.delete).toHaveBeenCalled());
       expect(axios.get).toHaveBeenCalledTimes(2);
       expect(
-        await queryByText("Category A", { selector: "td", exact: true }),
+        queryByText("Category A", { selector: "td", exact: true }),
       ).toBeNull();
       expect(toast.success).toHaveBeenCalledWith("Category is deleted");
     });
