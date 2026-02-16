@@ -24,7 +24,7 @@ jest.mock("@components/Layout", () => ({ children, ...props }) => (
 
 jest.mock("@components/AdminMenu", () => () => <div>Admin Menu</div>);
 
-describe("Products page", () => {
+describe("Products admin page", () => {
   beforeAll(() => {
     jest.spyOn(console, "log").mockImplementation(() => {});
   });
@@ -69,14 +69,20 @@ describe("Products page", () => {
     expect(
       getByText("A fake book", { selector: "p", exact: true }),
     ).toBeInTheDocument();
-    expect(getByAltText("Book", { selector: "img" })).toBeInTheDocument();
+    expect(getByAltText("Book", { selector: "img" })).toHaveAttribute(
+      "src",
+      "/api/v1/product/product-photo/1",
+    );
     expect(
       getByText("Laptop", { selector: "h5", exact: true }),
     ).toBeInTheDocument();
     expect(
       getByText("A fake laptop", { selector: "p", exact: true }),
     ).toBeInTheDocument();
-    expect(getByAltText("Laptop", { selector: "img" })).toBeInTheDocument();
+    expect(getByAltText("Laptop", { selector: "img" })).toHaveAttribute(
+      "src",
+      "/api/v1/product/product-photo/2",
+    );
   });
 
   it("should render empty products correctly", async () => {
