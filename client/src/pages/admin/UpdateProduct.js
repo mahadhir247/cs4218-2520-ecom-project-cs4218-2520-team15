@@ -175,6 +175,7 @@ const UpdateProduct = () => {
                 <label className="btn btn-outline-secondary col-md-12">
                   {product.photo?.name ? product.photo.name : "Upload Photo"}
                   <input
+                    data-testid="img-upload"
                     type="file"
                     name="photo"
                     accept="image/*"
