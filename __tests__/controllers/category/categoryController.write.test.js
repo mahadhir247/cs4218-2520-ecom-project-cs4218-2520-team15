@@ -4,6 +4,7 @@
 
 import {
   createCategoryController,
+  deleteCategoryController,
   updateCategoryController,
 } from "../../../controllers/categoryController";
 
@@ -184,6 +185,55 @@ describe("updateCategoryController function", () => {
       success: false,
       error: new Error("DB error"),
       message: "Error in updating category",
+    });
+  });
+});
+
+describe("deleteCategoryController function", () => {
+  let mockRes = {};
+
+  beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => {});
+    mockRes.status = jest.fn(() => mockRes);
+    mockRes.send = jest.fn(() => mockRes);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should delete category correctly", async () => {
+    const mockReq = { params: { id: "1" } };
+    categoryModel.findByIdAndDelete.mockResolvedValueOnce({
+      _id: "1",
+      name: "Category A",
+      slug: "category-a-slug",
+    });
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  });
+
+  it("should return error if server issues", async () => {
+    const mockReq = { params: { id: "1" } };
+    categoryModel.findByIdAndDelete.mockRejectedValue(new Error("DB error"));
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      error: new Error("DB error"),
+      message: "Error in deleting category",
     });
   });
 });
