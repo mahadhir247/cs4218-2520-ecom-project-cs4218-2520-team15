@@ -109,12 +109,13 @@ describe("createCategoryController function", () => {
 });
 
 describe("updateCategoryController function", () => {
-  let mockRes = {};
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn().mockReturnThis(),
+  };
 
   beforeAll(() => {
     jest.spyOn(console, "log").mockImplementation(() => {});
-    mockRes.status = jest.fn(() => mockRes);
-    mockRes.send = jest.fn(() => mockRes);
   });
 
   afterAll(() => {
