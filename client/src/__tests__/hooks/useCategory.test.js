@@ -49,7 +49,7 @@ describe("useCategory", () => {
     const { result } = renderHook(() => useCategory());
 
     await waitFor(() => {
-      expect(result.current).toEqual(undefined);
+      expect(result.current).toEqual([]);
     });
   });
 
@@ -59,7 +59,7 @@ describe("useCategory", () => {
     const { result } = renderHook(() => useCategory());
 
     await waitFor(() => {
-      expect(result.current).toEqual(null);
+      expect(result.current).toEqual([]);
     });
   });
 });
