@@ -9,30 +9,30 @@ export const registerController = async (req, res) => {
     const { name, email, password, phone, address, answer } = req.body;
     //validations
     if (!name) {
-      return res.status(400).send({ message: "Name is Required" });
+      return res.send({ message: "Name is required for registration." });
     }
     if (!email) {
-      return res.status(400).send({ message: "Email is Required" });
+      return res.send({ message: "Email is required for registration." });
     }
     if (!password) {
-      return res.status(400).send({ message: "Password is Required" });
+      return res.send({ message: "Password is required for registration." });
     }
     if (!phone) {
-      return res.status(400).send({ message: "Phone no is Required" });
+      return res.send({ message: "Phone number is required for registration." });
     }
     if (!address) {
-      return res.status(400).send({ message: "Address is Required" });
+      return res.send({ message: "Address is required for registration." });
     }
     if (!answer) {
-      return res.status(400).send({ message: "Answer is Required" });
+      return res.send({ message: "Answer is required for registration." });
     }
     //check user
     const exisitingUser = await userModel.findOne({ email });
     //exisiting user
     if (exisitingUser) {
-      return res.status(400).send({
+      return res.status(200).send({
         success: false,
-        message: "Already Register please login",
+        message: "User is already registered. Please login.",
       });
     }
     //register user
@@ -49,7 +49,7 @@ export const registerController = async (req, res) => {
 
     res.status(201).send({
       success: true,
-      message: "User Register Successfully",
+      message: "User registered successfully",
       user,
     });
   } catch (error) {
@@ -83,7 +83,7 @@ export const loginController = async (req, res) => {
     }
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(400).send({
+      return res.status(200).send({
         success: false,
         message: "Invalid Password",
       });
