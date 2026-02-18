@@ -1,16 +1,19 @@
-import categoryModel from "../models/categoryModel.js";
 import slugify from "slugify";
+import categoryModel from "../models/categoryModel.js";
+
 export const createCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.status(401).send({ message: "Name is required" });
+      return res
+        .status(400)
+        .send({ success: false, message: "Name is required" });
     }
     const existingCategory = await categoryModel.findOne({ name });
     if (existingCategory) {
       return res.status(200).send({
-        success: true,
-        message: "Category Already Exisits",
+        success: false,
+        message: "Category already exists",
       });
     }
     const category = await new categoryModel({
@@ -19,7 +22,7 @@ export const createCategoryController = async (req, res) => {
     }).save();
     res.status(201).send({
       success: true,
-      message: "new category created",
+      message: "New category created",
       category,
     });
   } catch (error) {
@@ -27,7 +30,7 @@ export const createCategoryController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error in Category",
+      message: "Error in creating category",
     });
   }
 };
@@ -40,7 +43,7 @@ export const updateCategoryController = async (req, res) => {
     const category = await categoryModel.findByIdAndUpdate(
       id,
       { name, slug: slugify(name) },
-      { new: true }
+      { new: true },
     );
     res.status(200).send({
       success: true,
