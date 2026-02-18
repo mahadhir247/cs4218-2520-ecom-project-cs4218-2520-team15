@@ -42,7 +42,7 @@ describe("authMiddleware Tests", () => {
 
             await requireSignIn(req, res, next);
 
-            expect(JWT.verify).toHaveBeenCalledWith('mockToken', process.env.JWT_SECRET);
+            expect(JWT.verify).toHaveBeenCalledWith('mockToken', 'mockJWTSecret');
             expect(req.user).toBe(mockUser);
             expect(next).toHaveBeenCalled();
         });

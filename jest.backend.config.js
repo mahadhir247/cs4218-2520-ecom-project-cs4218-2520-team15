@@ -17,4 +17,7 @@ export default {
       functions: 100,
     },
   },
+
+  // mock env variables
+  setupFiles: ["<rootDir>/setEnvVars.js"]
 };
