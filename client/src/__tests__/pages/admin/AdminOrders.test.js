@@ -86,6 +86,29 @@ describe("Admin Orders page", () => {
     expect(await screen.getByText("No orders found.")).toBeInTheDocument();
   });
 
+  it("does not fetch orders if user is not authenticated", () => {
+    useAuth.mockReturnValue([null, jest.fn()]);
+
+    render(<AdminOrders />);
+
+    expect(axios.get).not.toHaveBeenCalled();
+  });
+
+  it("logs error on API failure", async () => {
+    const err = new Error("Network error");
+    axios.get.mockRejectedValueOnce(err);
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    render(<AdminOrders />);
+
+    await waitFor(() => expect(consoleSpy).toHaveBeenCalledWith(err));
+    
+    expect(await screen.findByText("No orders found.")).toBeInTheDocument();
+    
+    consoleSpy.mockRestore();
+  });
+
   it("handles status change correctly", async () => {
     axios.get.mockResolvedValueOnce({ data: mockOrders });
     axios.put.mockResolvedValueOnce({ data: { success: true } });
@@ -105,26 +128,23 @@ describe("Admin Orders page", () => {
     expect(axios.get).toHaveBeenCalledTimes(2); // initial fetch + after status change
   });
 
-  it("does not fetch orders if user is not authenticated", () => {
-    useAuth.mockReturnValue([null, jest.fn()]);
+  it("logs error on status change API failure", async () => {
+    axios.get.mockResolvedValueOnce({ data: mockOrders });
 
-    render(<AdminOrders />);
-
-    expect(axios.get).not.toHaveBeenCalled();
-  });
-
-  it("logs error on API failure", async () => {
-    const err = new Error("Network Error");
-    axios.get.mockRejectedValueOnce(err);
+    const err = new Error("Network error");
+    axios.put.mockRejectedValueOnce(err);
 
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     render(<AdminOrders />);
+    
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument());
+    
+    const select = screen.getByTestId("status-select");
+    fireEvent.change(select, { target: { value: "Shipped" } });
 
     await waitFor(() => expect(consoleSpy).toHaveBeenCalledWith(err));
-    
-    expect(await screen.findByText("No orders found.")).toBeInTheDocument();
-    
+
     consoleSpy.mockRestore();
   });
 });
