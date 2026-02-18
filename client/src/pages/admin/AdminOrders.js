@@ -48,9 +48,14 @@ const AdminOrders = () => {
         </div>
         <div className="col-md-9">
           <h1 className="text-center">All Orders</h1>
+
+          {orders?.length === 0 && (
+            <p className="text-center">No orders found.</p>
+          )}
+
           {orders?.map((o, i) => {
             return (
-              <div className="border shadow">
+              <div className="border shadow" key={o?._id}>
                 <table className="table">
                   <thead>
                     <tr>
@@ -97,7 +102,7 @@ const AdminOrders = () => {
                           height={"250px"}
                         />
                       </div>
-                      <div className="col-md-4">
+                      <div className="col-md-8">
                         <h4>{p.name}</h4>
                         <p>{p.description.substring(0, 30)}</p>
                         <p>Price: ${p.price}</p>
