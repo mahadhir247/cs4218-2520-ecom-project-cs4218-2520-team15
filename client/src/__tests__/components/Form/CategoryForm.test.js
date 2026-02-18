@@ -1,9 +1,13 @@
-import { render } from "@testing-library/react";
+/* Name: Lee Guan Kai Delon
+ * Student No: A0273286W
+ */
+
+import { act, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import CategoryForm from "../../../components/Form/CategoryForm";
 
-const mockHandleSubmit = jest.fn();
+const mockHandleSubmit = jest.fn((e) => e.preventDefault());
 
 const CategoryFormWithTestState = () => {
   const [value, setValue] = useState("");
@@ -41,7 +45,9 @@ describe("CategoryForm component", () => {
       <CategoryFormWithTestState />,
     );
     const inputField = getByPlaceholderText("Enter new category");
-    await user.type(inputField, "Category A");
+    await act(async () => {
+      await user.type(inputField, "Category A");
+    });
 
     expect(inputField).toHaveValue("Category A");
     expect(getByText("Submit")).toBeEnabled();
@@ -55,8 +61,10 @@ describe("CategoryForm component", () => {
     );
     const inputField = getByPlaceholderText("Enter new category");
     const submitButton = getByText("Submit");
-    await user.type(inputField, "Category A");
-    await user.click(submitButton);
+    await act(async () => {
+      await user.type(inputField, "Category A");
+      await user.click(submitButton);
+    });
 
     expect(mockHandleSubmit).toHaveBeenCalledTimes(1);
   });
