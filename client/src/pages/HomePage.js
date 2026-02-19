@@ -86,7 +86,7 @@ const HomePage = () => {
   // Load next unfiltered page whenever `page` increments (but not on first render and not while filters are active)
   useEffect(() => {
     if (page === 1) return;
-    if (!isFiltering) getAllProducts();
+    getAllProducts();
   }, [page]);
 
   // --------------- FILTERED PRODUCT FETCHING ---------------
@@ -101,7 +101,6 @@ const HomePage = () => {
   // When filterPage increments (Load More pressed while filtering), append next page
   useEffect(() => {
     if (!isFiltering) return;
-    if (filterPage === 1) return; // already handled by the criteria-change effect above
     filterProduct();
   }, [filterPage]);
 
