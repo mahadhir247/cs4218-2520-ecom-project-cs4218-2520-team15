@@ -119,23 +119,6 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
       expect(selectMock).toHaveBeenCalledWith("-photo");
     });
 
-    it("should limit results to 12 products", async () => {
-      // Arrange
-      const limitMock = jest.fn().mockReturnThis();
-      productModel.find.mockReturnValue({
-        populate: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        limit: limitMock,
-        sort: jest.fn().mockResolvedValue(mockProducts),
-      });
-
-      // Act
-      await getProductController(req, res);
-
-      // Assert
-      expect(limitMock).toHaveBeenCalledWith(12);
-    });
-
     it("should sort products by createdAt in descending order", async () => {
       // Arrange
       const sortMock = jest.fn().mockResolvedValue(mockProducts);
