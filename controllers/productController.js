@@ -73,7 +73,7 @@ export const getProductController = async (req, res) => {
     
     res.status(200).send({
       success: true,
-      counTotal: products.length,
+      total: products.length,
       message: "All products fetched successfully",
       products,
     });
@@ -228,6 +228,7 @@ export const productFiltersController = async (req, res) => {
 
     res.status(200).send({
       success: true,
+      total: products.length,
       message: "Filtered products successfully",
       products,
     });
