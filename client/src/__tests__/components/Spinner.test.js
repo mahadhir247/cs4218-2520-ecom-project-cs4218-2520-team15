@@ -1,3 +1,7 @@
+/* Name: Tan Qin Xu
+ * Student No: A0213002J
+ */
+
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
@@ -41,7 +45,7 @@ describe("Spinner", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
-  test("counts down from 3 to 0", async () => {
+  test("counts down from 3 to 1", async () => {
     render(
       <BrowserRouter>
         <Spinner />
