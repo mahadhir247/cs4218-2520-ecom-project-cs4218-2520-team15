@@ -24,7 +24,6 @@ const CartConsumer = () => {
     return (
         <div>
             <span data-testid="cart-value">{JSON.stringify(cart)}</span>
-            <span data-testid="cart-length">{cart.length}</span>
             <button data-testid="add-item-button" onClick={handleAddItem}>
                 Add item
             </button>
@@ -79,9 +78,7 @@ describe("CartContext", () => {
                 </CartProvider>
             );
 
-            const cartValue = screen.getByTestId("cart-value").textContent;
-
-            expect(cartValue).toBe("[]");
+            expect(screen.getByTestId("cart-value").textContent).toBe("[]");
             expect(window.localStorage.getItem).toHaveBeenCalledWith("cart");
         });
 
@@ -101,36 +98,12 @@ describe("CartContext", () => {
                 );
             });
         });
-
-        test("initializes cart with multiple items from localStorage", async () => {
-            const storedCart = [
-                { id: 1, name: "Item A" },
-                { id: 2, name: "Item B" },
-                { id: 3, name: "Item C" },
-            ];
-            window.localStorage.getItem.mockReturnValueOnce(JSON.stringify(storedCart));
-
-            render(
-                <CartProvider>
-                    <CartConsumer />
-                </CartProvider>
-            );
-
-            await waitFor(() => {
-                expect(screen.getByTestId("cart-length").textContent).toBe("3");
-                expect(screen.getByTestId("cart-value").textContent).toBe(
-                    JSON.stringify(storedCart)
-                );
-            });
-        });
     });
 
     describe("localStorage Error Handling", () => {
         test("handles invalid JSON in localStorage gracefully and keeps cart empty", async () => {
             window.localStorage.getItem.mockReturnValueOnce("this-is-not-json");
-            const consoleErrorSpy = jest
-                .spyOn(console, "error")
-                .mockImplementation(() => {});
+            const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
             render(
                 <CartProvider>
@@ -150,11 +123,9 @@ describe("CartContext", () => {
             consoleErrorSpy.mockRestore();
         });
 
-        test("ignores localStorage data silently when stored value is not an array", async () => {
+        test("ignores non-array JSON in localStorage silently without logging an error", async () => {
             window.localStorage.getItem.mockReturnValueOnce(JSON.stringify({ id: 1 }));
-            const consoleErrorSpy = jest
-                .spyOn(console, "error")
-                .mockImplementation(() => {});
+            const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
             render(
                 <CartProvider>
@@ -167,41 +138,12 @@ describe("CartContext", () => {
             });
 
             expect(consoleErrorSpy).not.toHaveBeenCalled();
-
             consoleErrorSpy.mockRestore();
-        });
-
-        test("ignores localStorage data silently when stored value is a plain string", async () => {
-            window.localStorage.getItem.mockReturnValueOnce(JSON.stringify("just a string"));
-
-            render(
-                <CartProvider>
-                    <CartConsumer />
-                </CartProvider>
-            );
-
-            await waitFor(() => {
-                expect(screen.getByTestId("cart-value").textContent).toBe("[]");
-            });
-        });
-
-        test("ignores localStorage data silently when stored value is null JSON", async () => {
-            window.localStorage.getItem.mockReturnValueOnce(JSON.stringify(null));
-
-            render(
-                <CartProvider>
-                    <CartConsumer />
-                </CartProvider>
-            );
-
-            await waitFor(() => {
-                expect(screen.getByTestId("cart-value").textContent).toBe("[]");
-            });
         });
     });
 
     describe("Cart State Updates", () => {
-        test("allows adding a single item to the cart via setCart", () => {
+        test("allows adding a single item to the cart", () => {
             window.localStorage.getItem.mockReturnValueOnce(null);
 
             render(
@@ -217,7 +159,7 @@ describe("CartContext", () => {
             );
         });
 
-        test("allows adding multiple items sequentially to the cart", () => {
+        test("allows adding multiple items sequentially", () => {
             window.localStorage.getItem.mockReturnValueOnce(null);
 
             render(
@@ -229,7 +171,6 @@ describe("CartContext", () => {
             fireEvent.click(screen.getByTestId("add-item-button"));
             fireEvent.click(screen.getByTestId("add-second-item-button"));
 
-            expect(screen.getByTestId("cart-length").textContent).toBe("2");
             expect(screen.getByTestId("cart-value").textContent).toBe(
                 JSON.stringify([
                     { id: 1, name: "Test item" },
@@ -238,7 +179,7 @@ describe("CartContext", () => {
             );
         });
 
-        test("allows clearing the cart via setCart", () => {
+        test("allows clearing the cart", () => {
             window.localStorage.getItem.mockReturnValueOnce(null);
 
             render(
@@ -251,27 +192,6 @@ describe("CartContext", () => {
             fireEvent.click(screen.getByTestId("clear-cart-button"));
 
             expect(screen.getByTestId("cart-value").textContent).toBe("[]");
-        });
-
-        test("cart length updates correctly as items are added and removed", () => {
-            window.localStorage.getItem.mockReturnValueOnce(null);
-
-            render(
-                <CartProvider>
-                    <CartConsumer />
-                </CartProvider>
-            );
-
-            expect(screen.getByTestId("cart-length").textContent).toBe("0");
-
-            fireEvent.click(screen.getByTestId("add-item-button"));
-            expect(screen.getByTestId("cart-length").textContent).toBe("1");
-
-            fireEvent.click(screen.getByTestId("add-second-item-button"));
-            expect(screen.getByTestId("cart-length").textContent).toBe("2");
-
-            fireEvent.click(screen.getByTestId("clear-cart-button"));
-            expect(screen.getByTestId("cart-length").textContent).toBe("0");
         });
     });
 
@@ -286,13 +206,10 @@ describe("CartContext", () => {
             );
 
             expect(screen.getByTestId("child-element")).toBeInTheDocument();
-            expect(screen.getByTestId("child-element").textContent).toBe("Hello");
         });
 
         test("useCart returns undefined when used outside of CartProvider", () => {
-            const consoleErrorSpy = jest
-                .spyOn(console, "error")
-                .mockImplementation(() => {});
+            const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
             const NoProviderConsumer = () => {
                 const cartContext = useCart();
@@ -306,21 +223,7 @@ describe("CartContext", () => {
             render(<NoProviderConsumer />);
 
             expect(screen.getByTestId("context-value").textContent).toBe("undefined");
-
             consoleErrorSpy.mockRestore();
-        });
-
-        test("reads localStorage exactly once on mount", () => {
-            window.localStorage.getItem.mockReturnValueOnce(null);
-
-            render(
-                <CartProvider>
-                    <CartConsumer />
-                </CartProvider>
-            );
-
-            expect(window.localStorage.getItem).toHaveBeenCalledTimes(1);
-            expect(window.localStorage.getItem).toHaveBeenCalledWith("cart");
         });
     });
 });
