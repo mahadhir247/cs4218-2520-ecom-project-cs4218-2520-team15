@@ -156,7 +156,7 @@ const HomePage = () => {
 
   // --------------- RENDER ---------------
   return (
-    <Layout title={"ALL Products - Best offers "}>
+    <Layout title={"ALL Products - Best offers"}>
       {/* banner image */}
       <img
         src="/images/Virtual.png"
@@ -204,7 +204,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="col-md-9 ">
+        <div className="col-md-9">
           <h1 className="text-center">All Products</h1>
 
           <div className="d-flex flex-wrap">
@@ -225,7 +225,7 @@ const HomePage = () => {
                       })}
                     </h5>
                   </div>
-                  <p className="card-text ">
+                  <p className="card-text">
                     {p.description.substring(0, 60)}...
                   </p>
                   <div className="card-name-price">
