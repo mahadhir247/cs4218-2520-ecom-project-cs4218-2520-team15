@@ -202,10 +202,224 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
       { _id: "2", name: "Product B", price: 80 },
     ];
 
-    it("should return 200 with filtered products when both category and price filters are provided", async () => {
+    const mockFilterQuery = (products = mockFilteredProducts, total = 10) => {
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(products),
+      });
+      productModel.countDocuments.mockResolvedValue(total);
+    };
+
+    // ----- Filter query args -----
+
+    it("should query with category filter when checked array is non-empty", async () => {
       // Arrange
-      req.body = { checked: ["cat1", "cat2"], radio: [10, 100] };
-      productModel.find.mockResolvedValue(mockFilteredProducts);
+      req.body = { checked: ["cat1", "cat2"], radio: [], page: 1 };
+      mockFilterQuery();
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(productModel.find).toHaveBeenCalledWith(
+        expect.objectContaining({ category: ["cat1", "cat2"] })
+      );
+    });
+
+    it("should query with price range filter when radio array is non-empty", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [20, 200], page: 1 };
+      mockFilterQuery();
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(productModel.find).toHaveBeenCalledWith(
+        expect.objectContaining({ price: { $gte: 20, $lte: 200 } })
+      );
+    });
+
+    it("should not include category key in query when checked array is empty", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [10, 100], page: 1 };
+      mockFilterQuery();
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      const callArgs = productModel.find.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty("category");
+    });
+
+    it("should not include price key in query when radio array is empty", async () => {
+      // Arrange
+      req.body = { checked: ["cat1"], radio: [], page: 1 };
+      mockFilterQuery();
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      const callArgs = productModel.find.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty("price");
+    });
+
+    it("should query with an empty args object when both checked and radio are empty", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [], page: 1 };
+      mockFilterQuery();
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(productModel.find).toHaveBeenCalledWith({});
+    });
+
+    it("should pass the same filter args to both find and countDocuments", async () => {
+      // Arrange
+      req.body = { checked: ["cat1"], radio: [10, 100], page: 1 };
+      mockFilterQuery();
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert — both calls must receive identical filter args so the count matches the query
+      const findArgs = productModel.find.mock.calls[0][0];
+      const countArgs = productModel.countDocuments.mock.calls[0][0];
+      expect(findArgs).toEqual(countArgs);
+    });
+
+    // ----- Pagination (skip) -----
+
+    it("should skip 0 products when page 1 is requested", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [], page: 1 };
+      const skipMock = jest.fn().mockReturnThis();
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: skipMock,
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockFilteredProducts),
+      });
+      productModel.countDocuments.mockResolvedValue(10);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(skipMock).toHaveBeenCalledWith(0);
+    });
+
+    it("should skip 6 products when page 2 is requested", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [], page: 2 };
+      const skipMock = jest.fn().mockReturnThis();
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: skipMock,
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockFilteredProducts),
+      });
+      productModel.countDocuments.mockResolvedValue(10);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert — perPage=6, page=2 → skip (2-1)*6 = 6
+      expect(skipMock).toHaveBeenCalledWith(6);
+    });
+
+    it("should default to page 1 (skip 0) when page is not provided in the request body", async () => {
+      // Arrange — no page property sent
+      req.body = { checked: [], radio: [] };
+      const skipMock = jest.fn().mockReturnThis();
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: skipMock,
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockFilteredProducts),
+      });
+      productModel.countDocuments.mockResolvedValue(10);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(skipMock).toHaveBeenCalledWith(0);
+    });
+
+    // ----- Pagination (limit) -----
+
+    it("should limit results to 6 products per page", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [], page: 1 };
+      const limitMock = jest.fn().mockReturnThis();
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: limitMock,
+        sort: jest.fn().mockResolvedValue(mockFilteredProducts),
+      });
+      productModel.countDocuments.mockResolvedValue(10);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(limitMock).toHaveBeenCalledWith(6);
+    });
+
+    // ----- Query chain -----
+
+    it("should exclude the photo field from results", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [], page: 1 };
+      const selectMock = jest.fn().mockReturnThis();
+      productModel.find.mockReturnValue({
+        select: selectMock,
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockFilteredProducts),
+      });
+      productModel.countDocuments.mockResolvedValue(10);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(selectMock).toHaveBeenCalledWith("-photo");
+    });
+
+    it("should sort filtered results by createdAt in descending order", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [], page: 1 };
+      const sortMock = jest.fn().mockResolvedValue(mockFilteredProducts);
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: sortMock,
+      });
+      productModel.countDocuments.mockResolvedValue(10);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+    });
+
+    // ----- Response shape -----
+
+    it("should return 200 with filtered products on success", async () => {
+      // Arrange
+      req.body = { checked: ["cat1"], radio: [10, 100], page: 1 };
+      mockFilterQuery();
 
       // Act
       await productFiltersController(req, res);
@@ -217,91 +431,47 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
       );
     });
 
-    it("should filter by category when checked array is non-empty", async () => {
-      // Arrange
-      req.body = { checked: ["cat1", "cat2"], radio: [] };
-      productModel.find.mockResolvedValue(mockFilteredProducts);
-
-      // Act
-      await productFiltersController(req, res);
-
-      // Assert
-      expect(productModel.find).toHaveBeenCalledWith(
-        expect.objectContaining({ category: ["cat1", "cat2"] })
-      );
-    });
-
-    it("should filter by price range when radio array is non-empty", async () => {
-      // Arrange
-      req.body = { checked: [], radio: [20, 200] };
-      productModel.find.mockResolvedValue(mockFilteredProducts);
-
-      // Act
-      await productFiltersController(req, res);
-
-      // Assert
-      expect(productModel.find).toHaveBeenCalledWith(
-        expect.objectContaining({ price: { $gte: 20, $lte: 200 } })
-      );
-    });
-
-    it("should not include category filter when checked array is empty", async () => {
-      // Arrange
-      req.body = { checked: [], radio: [10, 100] };
-      productModel.find.mockResolvedValue(mockFilteredProducts);
-
-      // Act
-      await productFiltersController(req, res);
-
-      // Assert
-      const callArgs = productModel.find.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty("category");
-    });
-
-    it("should not include price filter when radio array is empty", async () => {
-      // Arrange
-      req.body = { checked: ["cat1"], radio: [] };
-      productModel.find.mockResolvedValue(mockFilteredProducts);
-
-      // Act
-      await productFiltersController(req, res);
-
-      // Assert
-      const callArgs = productModel.find.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty("price");
-    });
-
-    it("should find all products when both checked and radio are empty", async () => {
-      // Arrange
-      req.body = { checked: [], radio: [] };
-      productModel.find.mockResolvedValue(mockFilteredProducts);
-
-      // Act
-      await productFiltersController(req, res);
-
-      // Assert
-      expect(productModel.find).toHaveBeenCalledWith({});
-    });
-
-    it("should return the correct total count in the response", async () => {
-      // Arrange
-      req.body = { checked: ["cat1"], radio: [10, 100] };
-      productModel.find.mockResolvedValue(mockFilteredProducts);
+    it("should return the total from countDocuments (not products.length) in the response", async () => {
+      // Arrange — countDocuments returns 20 even though only 2 products are on this page
+      req.body = { checked: ["cat1"], radio: [], page: 1 };
+      mockFilterQuery(mockFilteredProducts, 20);
 
       // Act
       await productFiltersController(req, res);
 
       // Assert
       expect(res.send).toHaveBeenCalledWith(
-        expect.objectContaining({ total: mockFilteredProducts.length })
+        expect.objectContaining({ total: 20 })
       );
     });
 
-    it("should return 400 with error message when database query fails", async () => {
+    it("should return empty products array and total 0 when no products match the filter", async () => {
+      // Arrange
+      req.body = { checked: ["nonexistent-cat"], radio: [9999, 99999], page: 1 };
+      mockFilterQuery([], 0);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ products: [], total: 0 })
+      );
+    });
+
+    // ----- Error handling -----
+
+    it("should return 400 with success false when the find query fails", async () => {
       // Arrange
       const dbError = new Error("DB error");
-      req.body = { checked: ["cat1"], radio: [10, 100] };
-      productModel.find.mockRejectedValue(dbError);
+      req.body = { checked: ["cat1"], radio: [10, 100], page: 1 };
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValue(dbError),
+      });
+      productModel.countDocuments.mockResolvedValue(10);
 
       // Act
       await productFiltersController(req, res);
@@ -313,17 +483,46 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
       );
     });
 
-    it("should return an empty products array when no products match the filters", async () => {
+    it("should return 400 with success false when countDocuments fails", async () => {
       // Arrange
-      req.body = { checked: ["nonexistent-cat"], radio: [9999, 99999] };
-      productModel.find.mockResolvedValue([]);
+      const dbError = new Error("Count failed");
+      req.body = { checked: ["cat1"], radio: [], page: 1 };
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockFilteredProducts),
+      });
+      productModel.countDocuments.mockRejectedValue(dbError);
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ success: false })
+      );
+    });
+
+    it("should include an error object in the response when a query fails", async () => {
+      // Arrange
+      const dbError = new Error("Query failed");
+      req.body = { checked: ["cat1"], radio: [], page: 1 };
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValue(dbError),
+      });
+      productModel.countDocuments.mockResolvedValue(10);
 
       // Act
       await productFiltersController(req, res);
 
       // Assert
       expect(res.send).toHaveBeenCalledWith(
-        expect.objectContaining({ products: [], total: 0 })
+        expect.objectContaining({ error: dbError })
       );
     });
   });

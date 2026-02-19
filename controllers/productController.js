@@ -218,16 +218,25 @@ export const updateProductController = async (req, res) => {
 // product filters
 export const productFiltersController = async (req, res) => {
   try {
-    const { checked, radio } = req.body;
+    const { checked, radio, page = 1 } = req.body;
+    const perPage = 6;
+
     let args = {};
     if (checked.length > 0) args.category = checked;
     if (radio.length) args.price = { $gte: radio[0], $lte: radio[1] };
 
-    const products = await productModel.find(args);
+    const products = await productModel
+        .find(args)
+        .select("-photo")
+        .skip((page - 1) * perPage)
+        .limit(perPage)
+        .sort({ createdAt: -1 });
+
+    const total = await productModel.countDocuments(args);
 
     res.status(200).send({
       success: true,
-      total: products.length,
+      total: total,
       message: "Filtered products successfully",
       products,
     });
