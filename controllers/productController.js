@@ -10,12 +10,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 //payment gateway
-var gateway = new braintree.BraintreeGateway({
-  environment: braintree.Environment.Sandbox,
-  merchantId: process.env.BRAINTREE_MERCHANT_ID,
-  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
-});
+var gateway;
+if (process.env.NODE_ENV !== "test") {
+  gateway = new braintree.BraintreeGateway({
+    environment: braintree.Environment.Sandbox,
+    merchantId: process.env.BRAINTREE_MERCHANT_ID,
+    publicKey: process.env.BRAINTREE_PUBLIC_KEY,
+    privateKey: process.env.BRAINTREE_PRIVATE_KEY,
+  });
+}
 
 export const createProductController = async (req, res) => {
   try {
@@ -85,6 +88,7 @@ export const getProductController = async (req, res) => {
     });
   }
 };
+
 // get single product
 export const getSingleProductController = async (req, res) => {
   try {
@@ -92,16 +96,24 @@ export const getSingleProductController = async (req, res) => {
       .findOne({ slug: req.params.slug })
       .select("-photo")
       .populate("category");
+
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
     res.status(200).send({
       success: true,
-      message: "Single Product Fetched",
+      message: "Single product fetched successfully",
       product,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Eror while getitng single product",
+      message: "Error while getting single product",
       error,
     });
   }
@@ -111,15 +123,29 @@ export const getSingleProductController = async (req, res) => {
 export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.pid).select("photo");
-    if (product.photo.data) {
-      res.set("Content-type", product.photo.contentType);
-      return res.status(200).send(product.photo.data);
+    
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
     }
+    
+    if (!product.photo || !product.photo.data) {
+      return res.status(404).send({
+        success: false,
+        message: "Photo not found",
+      });
+    }
+    
+    res.set("Content-type", product.photo.contentType);
+    return res.status(200).send(product.photo.data);
+    
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Erorr while getting photo",
+      message: "Error while getting photo",
       error,
     });
   }
@@ -281,7 +307,7 @@ export const searchProductController = async (req, res) => {
 };
 
 // similar products
-export const realtedProductController = async (req, res) => {
+export const relatedProductController = async (req, res) => {
   try {
     const { pid, cid } = req.params;
     const products = await productModel
@@ -292,36 +318,59 @@ export const realtedProductController = async (req, res) => {
       .select("-photo")
       .limit(3)
       .populate("category");
+
     res.status(200).send({
       success: true,
+      message: "Related products fetched successfully",
       products,
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "error while geting related product",
+      message: "Error while getting related products",
       error,
     });
   }
 };
 
-// get prdocyst by catgory
+// get product by category
 export const productCategoryController = async (req, res) => {
   try {
     const category = await categoryModel.findOne({ slug: req.params.slug });
-    const products = await productModel.find({ category }).populate("category");
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    const perPage = 3;
+    const page = req.params.page ? req.params.page : 1;
+    
+    const products = await productModel
+      .find({ category })
+      .select("-photo")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .populate("category")
+      .sort({ createdAt: -1 });
+
+    const total = await productModel.countDocuments({ category });
+
     res.status(200).send({
       success: true,
+      message: "Products by category fetched successfully",
       category,
       products,
+      total,
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
       error,
-      message: "Error While Getting products",
+      message: "Error while getting products by category",
     });
   }
 };
@@ -330,6 +379,10 @@ export const productCategoryController = async (req, res) => {
 //token
 export const braintreeTokenController = async (req, res) => {
   try {
+    if (!gateway) {
+      return res.status(500).send("Braintree not initialized");
+    }
+    
     gateway.clientToken.generate({}, function (err, response) {
       if (err) {
         res.status(500).send(err);
@@ -339,12 +392,17 @@ export const braintreeTokenController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).send(error);
   }
 };
 
 //payment
 export const brainTreePaymentController = async (req, res) => {
   try {
+    if (!gateway) {
+      return res.status(500).send("Braintree not initialized");
+    }
+    
     const { nonce, cart } = req.body;
     let total = 0;
     cart.map((i) => {
@@ -358,9 +416,9 @@ export const brainTreePaymentController = async (req, res) => {
           submitForSettlement: true,
         },
       },
-      function (error, result) {
+      async function (error, result) {
         if (result) {
-          const order = new orderModel({
+          const order = await new orderModel({
             products: cart,
             payment: result,
             buyer: req.user._id,
@@ -373,5 +431,6 @@ export const brainTreePaymentController = async (req, res) => {
     );
   } catch (error) {
     console.log(error);
+    res.status(500).send(error);
   }
 };
