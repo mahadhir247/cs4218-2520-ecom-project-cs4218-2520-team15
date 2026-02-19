@@ -1,3 +1,7 @@
+/* Name: Tan Qin Xu
+ * Student No: A0213002J
+ */
+
 import { jest, describe, test, expect, beforeEach } from "@jest/globals";
 
 const mockGenerate = jest.fn();
