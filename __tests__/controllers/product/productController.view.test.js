@@ -242,7 +242,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     expect(sentData.products).toEqual(mockProducts);
   });
 
-  it("should handle error when no related products are found", async () => {
+  it("should have no error when no related products are found", async () => {
     const selectMock = jest.fn().mockReturnThis();
     const limitMock = jest.fn().mockReturnThis();
     const populateMock = jest.fn().mockResolvedValue([]);
