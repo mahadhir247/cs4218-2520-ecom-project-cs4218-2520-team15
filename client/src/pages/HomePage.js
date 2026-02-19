@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Checkbox, Radio } from "antd";
 import { Prices } from "../components/Prices";
+import Layout from "../components/Layout";
 import { useCart } from "../context/cart";
+import { useNavigate } from "react-router-dom";
+import "../styles/Homepages.css";
 import axios from "axios";
 import toast from "react-hot-toast";
-import Layout from "./../components/Layout";
-import { AiOutlineReload } from "react-icons/ai";
-import "../styles/Homepages.css";
+import { Checkbox, Radio } from "antd";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -45,7 +44,9 @@ const HomePage = () => {
   const getTotal = async () => {
     try {
       const { data } = await axios.get("/api/v1/product/product-count");
-      setTotal(data?.total);
+      if (data?.success) {
+        setTotal(data?.total)
+      };
     } catch (error) {
       console.log(error);
     }
@@ -57,11 +58,12 @@ const HomePage = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
-
-      if (page === 1) {
-        setProducts(data.products);
-      } else {
-        setProducts((prev) => [...prev, ...data.products]);
+      if (data?.success) {
+        if (page === 1) {
+          setProducts(data?.products);
+        } else {
+          setProducts((prev) => [...prev, ...data?.products]);
+        }
       }
 
       setLoading(false);
@@ -113,13 +115,14 @@ const HomePage = () => {
         page: filterPage,
       });
 
-      if (filterPage === 1) {
-        setProducts(data?.products);
-      } else {
-        setProducts((prev) => [...prev, ...data?.products]);
+      if (data?.success) {
+        if (filterPage === 1) {
+          setProducts(data?.products);
+        } else {
+          setProducts((prev) => [...prev, ...data?.products]);
+        }
+        setFilteredTotal(data?.total);
       }
-
-      setFilteredTotal(data?.total);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -165,7 +168,7 @@ const HomePage = () => {
         width={"100%"}
       />
 
-      {/* banner image */}
+      {/* category filter */}
       <div className="container-fluid row mt-3 home-page">
         <div className="col-md-3 filters">
           <h4 className="text-center">Filter By Category</h4>
