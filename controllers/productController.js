@@ -345,13 +345,25 @@ export const productCategoryController = async (req, res) => {
       });
     }
 
-    const products = await productModel.find({ category }).populate("category");
+    const perPage = 3;
+    const page = req.params.page ? req.params.page : 1;
+    
+    const products = await productModel
+      .find({ category })
+      .select("-photo")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .populate("category")
+      .sort({ createdAt: -1 });
+
+    const total = await productModel.countDocuments({ category });
 
     res.status(200).send({
       success: true,
       message: "Products by category fetched successfully",
       category,
       products,
+      total,
     });
   } catch (error) {
     console.log(error);
