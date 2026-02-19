@@ -223,7 +223,14 @@ export const productFiltersController = async (req, res) => {
 
     let args = {};
     if (checked.length > 0) args.category = checked;
-    if (radio.length) args.price = { $gte: radio[0], $lte: radio[1] };
+    if (radio.length) {
+      // JSON serialization changes Infinity to null
+      if (radio[1] === null) {
+        args.price = { $gte: radio[0] };
+      } else {
+        args.price = { $gte: radio[0], $lte: radio[1] };
+      }
+    }
 
     const products = await productModel
         .find(args)

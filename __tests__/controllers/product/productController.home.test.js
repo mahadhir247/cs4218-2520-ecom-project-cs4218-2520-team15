@@ -242,6 +242,20 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
       );
     });
 
+    it("should query with price upper range filter when radio array is non-empty and radio[1] is Infinity", async () => {
+      // Arrange
+      req.body = { checked: [], radio: [100, null], page: 1 }; // JSON serialization changes Infinity to null
+      mockFilterQuery();
+
+      // Act
+      await productFiltersController(req, res);
+
+      // Assert
+      expect(productModel.find).toHaveBeenCalledWith(
+        expect.objectContaining({ price: { $gte: 100 } })
+      );
+    });
+
     it("should not include category key in query when checked array is empty", async () => {
       // Arrange
       req.body = { checked: [], radio: [10, 100], page: 1 };
