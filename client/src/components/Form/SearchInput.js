@@ -1,7 +1,9 @@
 import React from "react";
-import { useSearch } from "../../context/search";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useSearch } from "../../context/search";
 import { useNavigate } from "react-router-dom";
+
 const SearchInput = () => {
   const [values, setValues] = useSearch();
   const navigate = useNavigate();
@@ -9,15 +11,22 @@ const SearchInput = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.get(
-        `/api/v1/product/search/${values.keyword}`
-      );
-      setValues({ ...values, results: data?.results });
-      navigate("/search");
+      // Add safeguard to prevent searching with empty or whitespace only string
+      if (!values.keyword || values.keyword.trim().length === 0) {
+        throw new Error("Search keyword should not be empty or only whitepsaces");
+      } else {
+        const { data } = await axios.get(
+          `/api/v1/product/search/${values.keyword}`
+        );
+        setValues({ ...values, results: data?.results });
+        navigate("/search");
+      }
     } catch (error) {
       console.log(error);
+      toast.error(error.message)
     }
   };
+
   return (
     <div>
       <form className="d-flex" role="search" onSubmit={handleSubmit}>
