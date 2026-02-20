@@ -2,7 +2,10 @@
  * Student No: A0273286W
  */
 
-import { createCategoryController } from "../../../controllers/categoryController";
+import {
+  createCategoryController,
+  updateCategoryController,
+} from "../../../controllers/categoryController";
 
 jest.mock(
   "slugify",
@@ -101,6 +104,86 @@ describe("createCategoryController function", () => {
       success: false,
       error: new Error("DB error"),
       message: "Error in creating category",
+    });
+  });
+});
+
+describe("updateCategoryController function", () => {
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn().mockReturnThis(),
+  };
+
+  beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should update category correctly", async () => {
+    const mockReq = { params: { id: "1" }, body: { name: "Category A" } };
+    categoryModel.findByIdAndUpdate.mockResolvedValueOnce({
+      _id: "1",
+      name: "Category A",
+      slug: "category-a-slug",
+    });
+
+    await updateCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Category updated successfully",
+      category: {
+        _id: "1",
+        name: "Category A",
+        slug: "category-a-slug",
+      },
+    });
+  });
+
+  it("should return error if missing fields", async () => {
+    const mockReq = { params: { id: "1" }, body: { name: "" } };
+
+    await updateCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Name is required",
+    });
+  });
+
+  it("should return error if category not found", async () => {
+    const mockReq = { params: { id: "1" }, body: { name: "Category A" } };
+    categoryModel.findByIdAndUpdate.mockResolvedValueOnce(null);
+
+    await updateCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Category does not exist",
+    });
+  });
+
+  it("should return error if server issues", async () => {
+    const mockReq = { params: { id: "1" }, body: { name: "Category A" } };
+    categoryModel.findByIdAndUpdate.mockRejectedValue(new Error("DB error"));
+
+    await updateCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      error: new Error("DB error"),
+      message: "Error in updating category",
     });
   });
 });
