@@ -103,7 +103,6 @@ describe("Header", () => {
             fireEvent.click(screen.getByText("Logout"));
 
             expect(mockSetAuth).toHaveBeenCalledWith({
-                ...mockAuth,
                 user: null,
                 token: "",
             });
