@@ -329,7 +329,17 @@ export const productListController = async (req, res) => {
 export const searchProductController = async (req, res) => {
   try {
     const { keyword } = req.params;
-    const resutls = await productModel
+
+    // Check for empty keyword
+    if (!keyword || keyword.trim().length === 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Search keyword is required",
+        results: [],
+      });
+    }
+
+    const results = await productModel
       .find({
         $or: [
           { name: { $regex: keyword, $options: "i" } },
@@ -337,12 +347,17 @@ export const searchProductController = async (req, res) => {
         ],
       })
       .select("-photo");
-    res.json(resutls);
+
+    res.status(200).send({
+      success: true,
+      message: "Products searched successfully",
+      results,
+    });
   } catch (error) {
     console.log(error);
-    res.status(400).send({
+    res.status(500).send({
       success: false,
-      message: "Error In Search Product API",
+      message: "Error in searching for products",
       error,
     });
   }
