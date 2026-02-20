@@ -1,11 +1,11 @@
-import productModel from "../models/productModel.js";
 import categoryModel from "../models/categoryModel.js";
 import orderModel from "../models/orderModel.js";
+import productModel from "../models/productModel.js";
 
-import fs from "fs";
-import slugify from "slugify";
 import braintree from "braintree";
 import dotenv from "dotenv";
+import fs from "fs";
+import slugify from "slugify";
 
 dotenv.config();
 
@@ -25,33 +25,52 @@ export const createProductController = async (req, res) => {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //alidation
+    //validation
     switch (true) {
       case !name:
-        return res.status(500).send({ error: "Name is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Name is required" });
       case !description:
-        return res.status(500).send({ error: "Description is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Description is required" });
       case !price:
-        return res.status(500).send({ error: "Price is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Price is required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Category is required" });
       case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Quantity is required" });
+      case !photo:
+        return res
+          .status(400)
+          .send({ success: false, message: "Photo is required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(400)
+          .send({ success: false, message: "Photo should be less then 1MB" });
     }
 
-    const products = new productModel({ ...req.fields, slug: slugify(name) });
-    if (photo) {
-      products.photo.data = fs.readFileSync(photo.path);
-      products.photo.contentType = photo.type;
-    }
+    const parsedShipping = shipping ? JSON.parse(shipping) : false; // shipping can be undefined, a string '0' or '1'
+    const products = new productModel({
+      ...req.fields,
+      slug: slugify(name),
+      photo: {
+        data: fs.readFileSync(photo.path),
+        contentType: photo.type,
+      },
+      shipping: parsedShipping,
+    });
     await products.save();
     res.status(201).send({
       success: true,
-      message: "Product Created Successfully",
+      message: "Product created successfully",
       products,
     });
   } catch (error) {
@@ -59,7 +78,7 @@ export const createProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error in crearing product",
+      message: "Error in creating product",
     });
   }
 };
