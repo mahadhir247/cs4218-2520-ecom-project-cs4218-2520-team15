@@ -78,6 +78,10 @@ describe("Category Product Page", () => {
     // Reset all mocks
     jest.clearAllMocks();
 
+    // Hide away console output for testing
+    jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
+
     mockNavigate = jest.fn();
     mockSetCart = jest.fn();
     mockCart = [];
@@ -202,7 +206,6 @@ describe("Category Product Page", () => {
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
     });
 
-    consoleLogSpy.mockRestore();
   });
 
   it("sets loading state while fetching", async () => {

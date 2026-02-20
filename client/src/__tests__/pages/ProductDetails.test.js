@@ -70,6 +70,10 @@ describe("Product Details Page", () => {
     // Reset all mocks
     jest.clearAllMocks();
 
+    // Hide away console output for testing
+    jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
+
     mockNavigate = jest.fn();
     mockSetCart = jest.fn();
     mockCart = [];
@@ -174,7 +178,7 @@ describe("Product Details Page", () => {
   });
 
   it("handles error when fetching product details", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    const consoleLogSpy = jest.spyOn(console, "log");
     axios.get.mockRejectedValueOnce(new Error("Network Error"));
 
     await act(async () => {renderProductDetails()});
@@ -182,12 +186,10 @@ describe("Product Details Page", () => {
     await waitFor(() => {
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
     });
-
-    consoleLogSpy.mockRestore();
   });
 
   it("handles error when fetching similar product", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    const consoleLogSpy = jest.spyOn(console, "log");
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockRejectedValueOnce(new Error("Network Error"));
 
@@ -196,8 +198,6 @@ describe("Product Details Page", () => {
     await waitFor(() => {
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
     });
-
-    consoleLogSpy.mockRestore();
   });
 
   // ============================================================

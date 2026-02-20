@@ -98,8 +98,9 @@ describe("Home Page", () => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Hide away console log for testing
+    // Hide away console output for testing
     jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
 
     mockNavigate = jest.fn();
     mockSetCart = jest.fn();
