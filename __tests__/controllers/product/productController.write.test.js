@@ -242,32 +242,6 @@ describe("createProductController function", () => {
           name: "Laptop",
           description: "A mock laptop",
           price: "9.99",
-          category: "1",
-        },
-        files: {
-          photo: {
-            path: "/path/mock-file.png",
-            type: "image/png",
-            size: 100,
-          },
-        },
-      };
-
-      await createProductController(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.send).toHaveBeenCalledWith({
-        success: false,
-        message: "Quantity is required",
-      });
-    });
-
-    it("should return error if quantity is missing", async () => {
-      const mockReq = {
-        fields: {
-          name: "Laptop",
-          description: "A mock laptop",
-          price: "9.99",
           quantity: "10",
         },
         files: {
@@ -285,6 +259,32 @@ describe("createProductController function", () => {
       expect(mockRes.send).toHaveBeenCalledWith({
         success: false,
         message: "Category is required",
+      });
+    });
+
+    it("should return error if quantity is missing", async () => {
+      const mockReq = {
+        fields: {
+          name: "Laptop",
+          description: "A mock laptop",
+          price: "9.99",
+          category: "1",
+        },
+        files: {
+          photo: {
+            path: "/path/mock-file.png",
+            type: "image/png",
+            size: 100,
+          },
+        },
+      };
+
+      await createProductController(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Quantity is required",
       });
     });
 
