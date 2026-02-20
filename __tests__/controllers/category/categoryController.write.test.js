@@ -8,14 +8,16 @@ import {
   updateCategoryController,
 } from "../../../controllers/categoryController";
 
+jest.mock("../../../models/categoryModel");
+jest.mock("../../../models/productModel");
+
 jest.mock(
   "slugify",
   () => (value) => `${value.toLowerCase().trim().replace(" ", "-")}-slug`,
 );
 
-jest.mock("../../../models/categoryModel");
-
 import categoryModel from "../../../models/categoryModel";
+import productModel from "../../../models/productModel";
 
 describe("createCategoryController function", () => {
   const mockRes = {
@@ -190,12 +192,13 @@ describe("updateCategoryController function", () => {
 });
 
 describe("deleteCategoryController function", () => {
-  let mockRes = {};
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn().mockReturnThis(),
+  };
 
   beforeAll(() => {
     jest.spyOn(console, "log").mockImplementation(() => {});
-    mockRes.status = jest.fn(() => mockRes);
-    mockRes.send = jest.fn(() => mockRes);
   });
 
   afterAll(() => {
@@ -208,6 +211,7 @@ describe("deleteCategoryController function", () => {
 
   it("should delete category correctly", async () => {
     const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(0);
     categoryModel.findByIdAndDelete.mockResolvedValueOnce({
       _id: "1",
       name: "Category A",
@@ -225,6 +229,7 @@ describe("deleteCategoryController function", () => {
 
   it("should return ok if category does not exist", async () => {
     const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(0);
     categoryModel.findByIdAndDelete.mockResolvedValueOnce(null);
 
     await deleteCategoryController(mockReq, mockRes);
@@ -236,8 +241,23 @@ describe("deleteCategoryController function", () => {
     });
   });
 
+  it("should return error if category has products", async () => {
+    const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(3);
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Unable to delete category that contains products",
+    });
+    expect(categoryModel.findByIdAndDelete).toHaveBeenCalledTimes(0);
+  });
+
   it("should return error if server issues", async () => {
     const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(0);
     categoryModel.findByIdAndDelete.mockRejectedValue(new Error("DB error"));
 
     await deleteCategoryController(mockReq, mockRes);

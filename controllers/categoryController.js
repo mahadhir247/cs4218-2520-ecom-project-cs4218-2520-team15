@@ -1,5 +1,6 @@
 import slugify from "slugify";
 import categoryModel from "../models/categoryModel.js";
+import productModel from "../models/productModel.js";
 
 export const createCategoryController = async (req, res) => {
   try {
@@ -113,6 +114,13 @@ export const singleCategoryController = async (req, res) => {
 export const deleteCategoryController = async (req, res) => {
   try {
     const { id } = req.params;
+    const productsCount = await productModel.countDocuments({ category: id });
+    if (productsCount > 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Unable to delete category that contains products",
+      });
+    }
     await categoryModel.findByIdAndDelete(id);
     res.status(200).send({
       success: true,
