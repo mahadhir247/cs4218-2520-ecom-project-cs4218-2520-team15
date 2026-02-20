@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import toast from "react-hot-toast";
 import { useSearch } from "../../context/search";
 import { useNavigate } from "react-router-dom";
 
@@ -23,7 +22,6 @@ const SearchInput = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message)
     }
   };
 
