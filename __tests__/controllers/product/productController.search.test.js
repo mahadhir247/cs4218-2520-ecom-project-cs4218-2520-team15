@@ -324,7 +324,7 @@ describe("Product Controller Unit Tests (related to Product Search)", () => {
   // Error Handling
   // ============================================================
   describe("Error handling test cases", () => {
-    it("should return 400 when the database throws an error", async () => {
+    it("should return 500 when the database throws an error", async () => {
       // Arrange
       req.params = { keyword: "laptop" };
       const mockSelect = jest.fn().mockRejectedValue(new Error("DB failure"));
@@ -334,7 +334,7 @@ describe("Product Controller Unit Tests (related to Product Search)", () => {
       await searchProductController(req, res);
 
       // Assert
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(500);
     });
 
     it("should return success: false when the database throws an error", async () => {

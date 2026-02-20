@@ -336,7 +336,7 @@ export const searchProductController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(400).send({
+    res.status(500).send({
       success: false,
       message: "Error in searching for products",
       error,
