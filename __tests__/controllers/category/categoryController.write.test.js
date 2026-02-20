@@ -223,6 +223,19 @@ describe("deleteCategoryController function", () => {
     });
   });
 
+  it("should return ok if category does not exist", async () => {
+    const mockReq = { params: { id: "1" } };
+    categoryModel.findByIdAndDelete.mockResolvedValueOnce(null);
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  });
+
   it("should return error if server issues", async () => {
     const mockReq = { params: { id: "1" } };
     categoryModel.findByIdAndDelete.mockRejectedValue(new Error("DB error"));
