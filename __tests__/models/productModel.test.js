@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import productModel from "../../models/productModel.js";
