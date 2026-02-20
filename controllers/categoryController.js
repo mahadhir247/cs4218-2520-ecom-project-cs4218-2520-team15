@@ -1,5 +1,6 @@
 import slugify from "slugify";
 import categoryModel from "../models/categoryModel.js";
+import productModel from "../models/productModel.js";
 
 export const createCategoryController = async (req, res) => {
   try {
@@ -110,19 +111,26 @@ export const singleCategoryController = async (req, res) => {
 };
 
 //delete category
-export const deleteCategoryCOntroller = async (req, res) => {
+export const deleteCategoryController = async (req, res) => {
   try {
     const { id } = req.params;
+    const productsCount = await productModel.countDocuments({ category: id });
+    if (productsCount > 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Unable to delete category that contains products",
+      });
+    }
     await categoryModel.findByIdAndDelete(id);
     res.status(200).send({
       success: true,
-      message: "Categry Deleted Successfully",
+      message: "Category deleted successfully",
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "error while deleting category",
+      message: "Error in deleting category",
       error,
     });
   }

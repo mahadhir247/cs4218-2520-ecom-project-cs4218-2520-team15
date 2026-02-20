@@ -4,17 +4,20 @@
 
 import {
   createCategoryController,
+  deleteCategoryController,
   updateCategoryController,
 } from "../../../controllers/categoryController";
+
+jest.mock("../../../models/categoryModel");
+jest.mock("../../../models/productModel");
 
 jest.mock(
   "slugify",
   () => (value) => `${value.toLowerCase().trim().replace(" ", "-")}-slug`,
 );
 
-jest.mock("../../../models/categoryModel");
-
 import categoryModel from "../../../models/categoryModel";
+import productModel from "../../../models/productModel";
 
 describe("createCategoryController function", () => {
   const mockRes = {
@@ -184,6 +187,86 @@ describe("updateCategoryController function", () => {
       success: false,
       error: new Error("DB error"),
       message: "Error in updating category",
+    });
+  });
+});
+
+describe("deleteCategoryController function", () => {
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn().mockReturnThis(),
+  };
+
+  beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should delete category correctly", async () => {
+    const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(0);
+    categoryModel.findByIdAndDelete.mockResolvedValueOnce({
+      _id: "1",
+      name: "Category A",
+      slug: "category-a-slug",
+    });
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  });
+
+  it("should return ok if category does not exist", async () => {
+    const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(0);
+    categoryModel.findByIdAndDelete.mockResolvedValueOnce(null);
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  });
+
+  it("should return error if category has products", async () => {
+    const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(3);
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Unable to delete category that contains products",
+    });
+    expect(categoryModel.findByIdAndDelete).toHaveBeenCalledTimes(0);
+  });
+
+  it("should return error if server issues", async () => {
+    const mockReq = { params: { id: "1" } };
+    productModel.countDocuments.mockResolvedValueOnce(0);
+    categoryModel.findByIdAndDelete.mockRejectedValue(new Error("DB error"));
+
+    await deleteCategoryController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      error: new Error("DB error"),
+      message: "Error in deleting category",
     });
   });
 });
