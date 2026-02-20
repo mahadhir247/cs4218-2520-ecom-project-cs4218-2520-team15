@@ -1,5 +1,149 @@
 # CS4218 Project - Virtual Vault
 
+[![Run Tests](https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team15/actions/workflows/main.yml/badge.svg)](https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team15/actions/workflows/main.yml)
+
+## Project Milestone 1 (MS1)
+
+### MS1 CI URL
+
+<u>**INSERT URL HERE**</u>
+
+### Mahadhir
+
+- Protected Routes
+  - context/auth.js
+  - helpers/authHelper.js
+  - middlewares/authMiddleware.js
+
+- Registration/Login
+  - pages/Auth/Register.js
+  - controllers/authController.js
+    - registerController
+    - loginController
+    - forgotPasswordController
+    - testController
+
+- Login
+  - pages/Auth/Login.js
+
+- General
+  - components/Routes/Private.js
+  - components/UserMenu.js
+  - pages/user/Dashboard.js
+
+---
+
+### Delon
+
+- Admin Dashboard
+  - components/AdminMenu.js
+  - pages/admin/AdminDashboard.js
+
+- Admin Actions
+  - components/Form/CategoryForm.js
+  - pages/admin/CreateCategory.js
+  - pages/admin/CreateProduct.js
+  - pages/admin/UpdateProduct.js
+  - controllers/categoryController.js
+    - createCategoryController
+    - updateCategoryController
+    - deleteCategoryController
+
+- Admin View Products
+  - pages/admin/Products.js
+  - controllers/productController.js
+    - createProductController
+    - deleteProductController
+    - updateProductController
+
+---
+
+### Inez
+
+- Product
+  - pages/ProductDetails.js
+  - pages/CategoryProduct.js
+  - controllers/productController.js
+    - getProductController
+    - getSingleProductController
+    - productPhotoController
+    - productFiltersController
+    - productCountController
+    - productListController
+    - searchProductController
+    - realtedProductController
+    - productCategoryController
+  - models/productModel.js
+
+- Search
+  - components/Form/SearchInput.js
+  - context/search.js
+  - pages/Search.js
+
+- Home
+  - pages/Homepage.js
+
+---
+
+### Jin Yin
+
+- General
+  - models/userModel.js
+
+- Profile
+  - pages/user/Profile.js
+
+- Order
+  - pages/user/Orders.js
+  - controllers/authController.js
+    - updateProfileController
+    - getOrdersController
+    - getAllOrdersController
+    - orderStatusController
+  - models/orderModel.js
+
+- Admin View Orders
+  - pages/admin/AdminOrders.js
+
+- Admin View Users
+  - pages/admin/Users.js
+
+---
+
+### Qin Xu
+
+- Cart
+  - context/cart.js
+  - pages/CartPage.js
+
+- Payment
+  - controllers/productController.js
+    - braintreeTokenController
+    - brainTreePaymentController
+
+- Category
+  - hooks/useCategory.js
+  - pages/Categories.js
+  - controllers/categoryController.js
+    - categoryControlller
+    - singleCategoryController
+  - models/categoryModel.js
+
+- Contact
+  - pages/Contact.js
+
+- Policy
+  - pages/Policy.js
+
+- General
+  - components/Footer.js
+  - components/Header.js
+  - components/Layout.js
+  - components/Spinner.js
+  - pages/About.js
+  - pages/Pagenotfound.js
+  - config/db.js
+
 ## 1. Project Introduction
 
 Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-commerce website, offering seamless connectivity and user-friendly features. The platform provides a robust framework for online shopping. The website is designed to adapt to evolving business needs and can be efficiently extended.
@@ -23,7 +167,6 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 ### 1. Installing Node.js
 
 1. **Download and Install Node.js**:
-
    - Visit [nodejs.org](https://nodejs.org) to download and install Node.js.
 
 2. **Verify Installation**:
@@ -36,26 +179,21 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 ### 2. MongoDB Setup
 
 1. **Download and Install MongoDB Compass**:
-
    - Visit [MongoDB Compass](https://www.mongodb.com/products/tools/compass) and download and install MongoDB Compass for your operating system.
 
 2. **Create a New Cluster**:
-
    - Sign up or log in to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register).
    - After logging in, create a project and within that project deploy a free cluster.
 
 3. **Configure Database Access**:
-
    - Create a new user for your database (if not alredy done so) in MongoDB Atlas.
    - Navigate to "Database Access" under "Security" and create a new user with the appropriate permissions.
 
 4. **Whitelist IP Address**:
-
    - Go to "Network Access" under "Security" and whitelist your IP address to allow access from your machine.
    - For example, you could whitelist 0.0.0.0 to allow access from anywhere for ease of use.
 
 5. **Connect to the Database**:
-
    - In your cluster's page on MongoDB Atlas, click on "Connect" and choose "Compass".
    - Copy the connection string.
 
@@ -67,7 +205,6 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from GitHub, follow these general steps:
 
 1. **Clone the Repository**
-
    - Go to the GitHub repository of the MERN app.
    - Click on the "Code" button and copy the URL of the repository.
    - Open your terminal or command prompt.
@@ -78,7 +215,6 @@ To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from G
    - Navigate into the cloned directory.
 
 2. **Install Frontend and Backend Dependencies**
-
    - Run the following command in your project's root directory:
 
      ```
@@ -86,14 +222,12 @@ To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from G
      ```
 
 3. **Add database connection string to `.env`**
-
    - Add the connection string copied from MongoDB Atlas to the `.env` file inside the project directory (replace the necessary placeholders):
      ```env
      MONGO_URL = <connection string>
      ```
 
 4. **Adding sample data to database**
-
    - Download “Sample DB Schema” from Canvas and extract it.
    - In MongoDB Compass, create a database named `test` under your cluster.
    - Add four collections to this database: `categories`, `orders`, `products`, and `users`.
@@ -127,7 +261,6 @@ To begin unit testing with Jest in your project, follow these steps:
 3. **Run Tests**  
    Execute your tests using Jest to ensure that your components meet the expected behaviour.  
    You can run the tests by using the following command in the root of the directory:
-
    - **Frontend tests**
 
      ```bash
