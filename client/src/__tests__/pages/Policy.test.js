@@ -48,6 +48,6 @@ describe("Policy", () => {
 
     const image = screen.getByAltText("policy");
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute("src", "/images/policy.jpeg");
+    expect(image).toHaveAttribute("src", "/images/contactus.jpeg");
   });
 });
