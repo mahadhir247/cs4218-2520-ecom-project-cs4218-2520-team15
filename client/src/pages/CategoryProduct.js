@@ -1,26 +1,51 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
+import { useCart } from "../context/cart";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/CategoryProductStyles.css";
 import axios from "axios";
+import toast from "react-hot-toast";
+
 const CategoryProduct = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [cart, setCart] = useCart();
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (params?.slug) getPrductsByCat();
+    if (params?.slug) {
+      setPage(1);
+      setProducts([]);
+      setCategory([]);
+    }
   }, [params?.slug]);
-  const getPrductsByCat = async () => {
+
+  useEffect(() => {
+    if (params?.slug) getProductsByCat();
+  }, [page, params?.slug]);
+
+  const getProductsByCat = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.get(
-        `/api/v1/product/product-category/${params.slug}`
+        `/api/v1/product/product-category/${params.slug}/${page}`
       );
-      setProducts(data?.products);
       setCategory(data?.category);
+      setTotal(data?.total);
+      
+      if (page === 1) {
+        setProducts(data?.products);
+      } else {
+        setProducts((prevProducts) => [...prevProducts, ...data?.products]);
+      }
+      setLoading(false);
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   };
 
@@ -28,7 +53,7 @@ const CategoryProduct = () => {
     <Layout>
       <div className="container mt-3 category">
         <h4 className="text-center">Category - {category?.name}</h4>
-        <h6 className="text-center">{products?.length} result found </h6>
+        <h6 className="text-center">Showing {products?.length} of {total} result(s)</h6>
         <div className="row">
           <div className="col-md-9 offset-1">
             <div className="d-flex flex-wrap">
@@ -59,25 +84,25 @@ const CategoryProduct = () => {
                       >
                         More Details
                       </button>
-                      {/* <button
-                    className="btn btn-dark ms-1"
-                    onClick={() => {
-                      setCart([...cart, p]);
-                      localStorage.setItem(
-                        "cart",
-                        JSON.stringify([...cart, p])
-                      );
-                      toast.success("Item Added to cart");
-                    }}
-                  >
-                    ADD TO CART
-                  </button> */}
+                      <button
+                        className="btn btn-dark ms-1"
+                        onClick={() => {
+                          setCart([...cart, p]);
+                          localStorage.setItem(
+                            "cart",
+                            JSON.stringify([...cart, p])
+                          );
+                          toast.success("Item Added to cart");
+                        }}
+                      >
+                        ADD TO CART
+                      </button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            {/* <div className="m-2 p-3">
+            <div className="m-2 p-3">
             {products && products.length < total && (
               <button
                 className="btn btn-warning"
@@ -86,10 +111,10 @@ const CategoryProduct = () => {
                   setPage(page + 1);
                 }}
               >
-                {loading ? "Loading ..." : "Loadmore"}
+                {loading ? "Loading..." : "Load More"}
               </button>
             )}
-          </div> */}
+          </div>
           </div>
         </div>
       </div>

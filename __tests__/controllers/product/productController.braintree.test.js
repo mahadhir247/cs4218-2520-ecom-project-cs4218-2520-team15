@@ -1,3 +1,7 @@
+/* Name: Tan Qin Xu
+ * Student No: A0213002J
+ */
+
 import { jest, describe, test, expect, beforeEach } from "@jest/globals";
 
 const mockGenerate = jest.fn();
@@ -13,7 +17,7 @@ jest.mock("braintree", () => ({
   },
 }));
 
-jest.mock("../../models/orderModel.js", () => ({
+jest.mock("../../../models/orderModel.js", () => ({
   __esModule: true,
   default: jest.fn().mockImplementation(() => ({
     save: jest.fn().mockResolvedValue({}),
@@ -21,16 +25,16 @@ jest.mock("../../models/orderModel.js", () => ({
 }));
 
 jest.mock("dotenv", () => ({ config: jest.fn() }));
-jest.mock("../../models/productModel.js");
-jest.mock("../../models/categoryModel.js");
+jest.mock("../../../models/productModel.js");
+jest.mock("../../../models/categoryModel.js");
 jest.mock("fs");
 jest.mock("slugify");
 
 import {
   braintreeTokenController,
   brainTreePaymentController,
-} from "../../controllers/productController.js";
-import orderModel from "../../models/orderModel.js";
+} from "../../../controllers/productController.js";
+import orderModel from "../../../models/orderModel.js";
 
 function createRes() {
   const res = {};

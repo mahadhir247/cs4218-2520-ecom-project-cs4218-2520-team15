@@ -66,6 +66,7 @@ router.get("/related-product/:pid/:cid", relatedProductController);
 
 //category wise product
 router.get("/product-category/:slug", productCategoryController);
+router.get("/product-category/:slug/:page", productCategoryController);
 
 //payments routes
 //token
