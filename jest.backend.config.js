@@ -10,11 +10,14 @@ export default {
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["models/**", "controllers/**"],
+  collectCoverageFrom: ["models/**", "controllers/**", "helpers/**", "middlewares/**"],
   coverageThreshold: {
     global: {
       lines: 100,
       functions: 100,
     },
   },
+
+  // mock env variables
+  setupFiles: ["<rootDir>/setEnvVars.js"]
 };

@@ -1,109 +1,152 @@
-import React, { useState, useEffect } from "react";
-import Layout from "./../../components/Layout";
-import AdminMenu from "./../../components/AdminMenu";
-import toast from "react-hot-toast";
+import { Modal, Select } from "antd";
 import axios from "axios";
-import { Select } from "antd";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import AdminMenu from "./../../components/AdminMenu";
+import Layout from "./../../components/Layout";
+
 const { Option } = Select;
 
 const UpdateProduct = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [categories, setCategories] = useState([]);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [shipping, setShipping] = useState("");
-  const [photo, setPhoto] = useState("");
-  const [id, setId] = useState("");
+  const [product, setProduct] = useState({
+    id: "",
+    name: "",
+    description: "",
+    photo: "",
+    category: "",
+    price: "",
+    quantity: "",
+    shipping: "",
+  });
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   //get single product
   const getSingleProduct = async () => {
     try {
       const { data } = await axios.get(
-        `/api/v1/product/get-product/${params.slug}`
+        `/api/v1/product/get-product/${params.slug}`,
       );
-      setName(data.product.name);
-      setId(data.product._id);
-      setDescription(data.product.description);
-      setPrice(data.product.price);
-      setPrice(data.product.price);
-      setQuantity(data.product.quantity);
-      setShipping(data.product.shipping);
-      setCategory(data.product.category._id);
+      if (data?.success) {
+        setProduct({
+          id: data.product._id,
+          name: data.product.name,
+          description: data.product.description,
+          photo: `/api/v1/product/product-photo/${data.product._id}`,
+          category: data.product.category._id,
+          price: data.product.price,
+          quantity: data.product.quantity,
+          shipping: data.product.shipping ? "1" : "0",
+        });
+        setIsFormValid(true);
+      } else {
+        setProduct({
+          id: "",
+          name: "",
+          description: "",
+          photo: "",
+          category: "",
+          price: "",
+          quantity: "",
+          shipping: "",
+        });
+      }
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong in getting product");
     }
   };
-  useEffect(() => {
-    getSingleProduct();
-    //eslint-disable-next-line
-  }, []);
+
   //get all category
   const getAllCategory = async () => {
     try {
       const { data } = await axios.get("/api/v1/category/get-category");
       if (data?.success) {
         setCategories(data?.category);
+      } else {
+        setCategories([]);
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something wwent wrong in getting catgeory");
+      toast.error("Something went wrong in getting category");
     }
   };
 
   useEffect(() => {
     getAllCategory();
+    getSingleProduct();
+    // eslint-disable-next-line
   }, []);
+
+  const updateField = (field, value) => {
+    if (field === "photo" && value?.size) {
+      if (value.size > 1000000) {
+        toast.error("Photo size cannot exceed 1MB");
+        return;
+      }
+    }
+    const updatedProduct = { ...product, [field]: value };
+    setProduct(updatedProduct);
+    const isValid = Object.values(updatedProduct).every((value) => !!value);
+    setIsFormValid(isValid);
+  };
 
   //create product function
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       const productData = new FormData();
-      productData.append("name", name);
-      productData.append("description", description);
-      productData.append("price", price);
-      productData.append("quantity", quantity);
-      photo && productData.append("photo", photo);
-      productData.append("category", category);
-      const { data } = axios.put(
-        `/api/v1/product/update-product/${id}`,
-        productData
+      productData.append("name", product.name);
+      productData.append("description", product.description);
+      productData.append("price", product.price);
+      productData.append("quantity", product.quantity);
+      if (product.photo instanceof File) {
+        productData.append("photo", product.photo);
+      }
+      productData.append("category", product.category);
+      productData.append("shipping", product.shipping);
+      const { data } = await axios.put(
+        `/api/v1/product/update-product/${product.id}`,
+        productData,
       );
       if (data?.success) {
-        toast.error(data?.message);
-      } else {
-        toast.success("Product Updated Successfully");
+        toast.success("Product updated successfully");
         navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error("something went wrong");
+      toast.error("Something went wrong");
     }
   };
 
   //delete a product
   const handleDelete = async () => {
     try {
-      let answer = window.prompt("Are You Sure want to delete this product ? ");
-      if (!answer) return;
       const { data } = await axios.delete(
-        `/api/v1/product/delete-product/${id}`
+        `/api/v1/product/delete-product/${product.id}`,
       );
-      toast.success("Product DEleted Succfully");
-      navigate("/dashboard/admin/products");
+      if (data?.success) {
+        toast.success("Product deleted successfully");
+        setVisible(false);
+        navigate("/dashboard/admin/products");
+      } else {
+        toast.error("Something went wrong");
+      }
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
     }
   };
+
   return (
-    <Layout title={"Dashboard - Create Product"}>
-      <div className="container-fluid m-3 p-3">
+    <Layout title={"Dashboard - Update Product"}>
+      <div className="container-fluid p-3">
         <div className="row">
           <div className="col-md-3">
             <AdminMenu />
@@ -112,15 +155,15 @@ const UpdateProduct = () => {
             <h1>Update Product</h1>
             <div className="m-1 w-75">
               <Select
-                bordered={false}
+                variant="borderless"
                 placeholder="Select a category"
                 size="large"
                 showSearch
                 className="form-select mb-3"
                 onChange={(value) => {
-                  setCategory(value);
+                  updateField("category", value);
                 }}
-                value={category}
+                value={product.category}
               >
                 {categories?.map((c) => (
                   <Option key={c._id} value={c._id}>
@@ -130,30 +173,26 @@ const UpdateProduct = () => {
               </Select>
               <div className="mb-3">
                 <label className="btn btn-outline-secondary col-md-12">
-                  {photo ? photo.name : "Upload Photo"}
+                  {product.photo?.name ? product.photo.name : "Upload Photo"}
                   <input
+                    data-testid="img-upload"
                     type="file"
                     name="photo"
                     accept="image/*"
-                    onChange={(e) => setPhoto(e.target.files[0])}
+                    onChange={(e) => updateField("photo", e.target.files[0])}
                     hidden
                   />
                 </label>
               </div>
               <div className="mb-3">
-                {photo ? (
+                {product.photo && (
                   <div className="text-center">
                     <img
-                      src={URL.createObjectURL(photo)}
-                      alt="product_photo"
-                      height={"200px"}
-                      className="img img-responsive"
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <img
-                      src={`/api/v1/product/product-photo/${id}`}
+                      src={
+                        product.photo instanceof File
+                          ? URL.createObjectURL(product.photo)
+                          : product.photo
+                      }
                       alt="product_photo"
                       height={"200px"}
                       className="img img-responsive"
@@ -164,70 +203,92 @@ const UpdateProduct = () => {
               <div className="mb-3">
                 <input
                   type="text"
-                  value={name}
-                  placeholder="write a name"
+                  value={product.name}
+                  placeholder="Enter a name"
                   className="form-control"
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => updateField("name", e.target.value)}
                 />
               </div>
               <div className="mb-3">
                 <textarea
                   type="text"
-                  value={description}
-                  placeholder="write a description"
+                  value={product.description}
+                  placeholder="Enter a description"
                   className="form-control"
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => updateField("description", e.target.value)}
                 />
               </div>
 
               <div className="mb-3">
                 <input
                   type="number"
-                  value={price}
-                  placeholder="write a Price"
+                  value={product.price}
+                  placeholder="Enter a price"
                   className="form-control"
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => updateField("price", e.target.value)}
                 />
               </div>
               <div className="mb-3">
                 <input
                   type="number"
-                  value={quantity}
-                  placeholder="write a quantity"
+                  value={product.quantity}
+                  placeholder="Enter a quantity"
                   className="form-control"
-                  onChange={(e) => setQuantity(e.target.value)}
+                  onChange={(e) => updateField("quantity", e.target.value)}
                 />
               </div>
               <div className="mb-3">
                 <Select
-                  bordered={false}
-                  placeholder="Select Shipping "
+                  variant="borderless"
+                  placeholder="Select shipping "
                   size="large"
                   showSearch
                   className="form-select mb-3"
                   onChange={(value) => {
-                    setShipping(value);
+                    updateField("shipping", value);
                   }}
-                  value={shipping ? "yes" : "No"}
+                  value={product.shipping}
                 >
-                  <Option value="0">No</Option>
-                  <Option value="1">Yes</Option>
+                  <Option key={0} value="0">
+                    No
+                  </Option>
+                  <Option key={1} value="1">
+                    Yes
+                  </Option>
                 </Select>
               </div>
               <div className="mb-3">
-                <button className="btn btn-primary" onClick={handleUpdate}>
-                  UPDATE PRODUCT
+                <button
+                  className="btn btn-primary"
+                  onClick={handleUpdate}
+                  disabled={!isFormValid}
+                >
+                  Update
                 </button>
               </div>
               <div className="mb-3">
-                <button className="btn btn-danger" onClick={handleDelete}>
-                  DELETE PRODUCT
+                <button
+                  className="btn btn-danger"
+                  onClick={() => setVisible(true)}
+                  disabled={Object.values(product).every(
+                    (value) => value === "",
+                  )}
+                >
+                  Delete
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Modal
+        title="Are you sure you want to delete this product?"
+        open={visible}
+        okText="Confirm"
+        okButtonProps={{ danger: true }}
+        onOk={handleDelete}
+        onCancel={() => setVisible(false)}
+      />
     </Layout>
   );
 };
