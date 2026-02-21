@@ -60,6 +60,30 @@ describe('Admin Users page', () => {
     expect(await screen.findByText('No users found')).toBeInTheDocument();
   });
 
+  it('renders empty state when API response data is null', async () => {
+    axios.get.mockResolvedValueOnce({ data: null });
+
+    render(<Users />);
+
+    await waitFor(() => expect(axios.get).toHaveBeenCalledWith('/api/v1/auth/users'));
+
+    expect(await screen.findByText('No users found')).toBeInTheDocument();
+  });
+
+  it('uses index as key when user _id is missing', async () => {
+    const mockUserWithMissingId = [
+      { name: 'Alice', email: 'alice@example.com', phone: '111', role: 0 }
+    ];
+
+    axios.get.mockResolvedValueOnce({ data: mockUserWithMissingId });
+
+    render(<Users />);
+
+    await waitFor(() => expect(axios.get).toHaveBeenCalledWith('/api/v1/auth/users'));
+
+    expect(await screen.findByText('Alice')).toBeInTheDocument();
+  });
+
   it('logs error and shows empty state on API failure', async () => {
     const err = new Error('Network Error');
     axios.get.mockRejectedValueOnce(err);
