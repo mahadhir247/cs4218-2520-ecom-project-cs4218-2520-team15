@@ -45,7 +45,7 @@ describe("About", () => {
       </BrowserRouter>
     );
 
-    const image = screen.getByAltText("contactus");
+    const image = screen.getByAltText("about");
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("src", "/images/about.jpeg");
   });
