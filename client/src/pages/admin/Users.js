@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../../components/Layout";
 import AdminMenu from "../../components/AdminMenu";
-// import Spinner from "../../components/Spinner";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
