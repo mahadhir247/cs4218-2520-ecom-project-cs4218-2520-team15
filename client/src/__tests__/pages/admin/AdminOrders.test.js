@@ -80,6 +80,24 @@ describe("Admin Orders page", () => {
     expect(screen.getByText("Price: $1000")).toBeInTheDocument();
   });
 
+  it("displays 'Failed' when payment is unsuccessful", async () => {
+    const failedOrder = [
+      {
+        ...mockOrders[0],
+        _id: "order2",
+        payment: { success: false },
+      },
+    ];
+    axios.get.mockResolvedValueOnce({ data: failedOrder });
+
+    render(<AdminOrders />);
+    
+    await waitFor(() => expect(axios.get).toHaveBeenCalledWith('/api/v1/auth/all-orders'));
+
+    expect(await screen.findByText("Failed")).toBeInTheDocument();
+    expect(screen.queryByText("Success")).not.toBeInTheDocument();
+  });
+
   it("renders empty state when there are no orders", async () => {
     axios.get.mockResolvedValueOnce({ data: [] });
     
@@ -115,7 +133,7 @@ describe("Admin Orders page", () => {
   });
 
   it("handles status change correctly", async () => {
-    axios.get.mockResolvedValueOnce({ data: mockOrders });
+    axios.get.mockResolvedValue({ data: mockOrders });
     axios.put.mockResolvedValueOnce({ data: { success: true } });
 
     render(<AdminOrders />);
@@ -131,6 +149,9 @@ describe("Admin Orders page", () => {
     ));
 
     expect(axios.get).toHaveBeenCalledTimes(2); // initial fetch + after status change
+
+    const updatedStatus = await screen.findByText("Shipped");
+    expect(updatedStatus).toBeInTheDocument();
   });
 
   it("logs error on status change API failure", async () => {
