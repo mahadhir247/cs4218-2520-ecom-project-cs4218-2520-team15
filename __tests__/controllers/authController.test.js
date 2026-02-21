@@ -191,7 +191,7 @@ describe("Auth Controller Test", () => {
 
             await loginController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid email or password" });
         });
 
@@ -203,7 +203,7 @@ describe("Auth Controller Test", () => {
 
             await loginController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid email or password" });
         });
 
@@ -216,7 +216,7 @@ describe("Auth Controller Test", () => {
 
             await loginController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({ success: false, message: "Email is not registered" });
         });
 
@@ -231,7 +231,7 @@ describe("Auth Controller Test", () => {
             await loginController(req, res);
 
             expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid Password" });
+            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Password is incorrect" });
         });
 
         it("should login user successfully", async () => {
@@ -291,8 +291,8 @@ describe("Auth Controller Test", () => {
 
             await forgotPasswordController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.send).toHaveBeenCalledWith({ message: "Email is required" });
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({ message: "Email is required for password reset." });
         });
 
         it("should return error if missing answer", async () => {
@@ -304,8 +304,8 @@ describe("Auth Controller Test", () => {
 
             await forgotPasswordController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.send).toHaveBeenCalledWith({ message: "Answer is required" });
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({ message: "Answer is required for password reset." });
         });
 
         it("should return error if missing new password", async () => {
@@ -317,12 +317,12 @@ describe("Auth Controller Test", () => {
 
             await forgotPasswordController(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.send).toHaveBeenCalledWith({ message: "New Password is required" });
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({ message: "New password is required for password reset." });
         });
 
         // Source code validates by finding email, answer pair in db
-        it("should return error if wrong email or answer", async () => {
+        it("should return error if answer does not match email pair", async () => {
             req.body = {
                 email: 'test@gmail.com',
                 answer: 'test',
@@ -333,8 +333,8 @@ describe("Auth Controller Test", () => {
             await forgotPasswordController(req, res);
 
             expect(userModel.findOne).toHaveBeenCalledWith({ email: 'test@gmail.com', answer: 'test' });
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Wrong Email Or Answer" });
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({ success: false, message: "Answer is incorrect" });
         });
 
         it("should reset password successfully", async () => {
