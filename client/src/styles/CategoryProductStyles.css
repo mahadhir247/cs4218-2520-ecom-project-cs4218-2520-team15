@@ -3,7 +3,7 @@
     margin-top: 80px !important;
   }
   .category .card {
-    background-color: rgba(128, 128, 128, 0.097);
+    background-color: goldenrod;
     width: 18rem;
   }
   .category .card-name-price {
