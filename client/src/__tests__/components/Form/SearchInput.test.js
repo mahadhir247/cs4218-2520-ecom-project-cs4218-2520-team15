@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import React from "react";
 import axios from "axios";
 import SearchInput from "../../../components/Form/SearchInput.js";
@@ -37,6 +41,10 @@ describe("Search Input Form Component", () => {
 
     useNavigate.mockReturnValue(mockNavigate);
     useSearch.mockReturnValue([mockValues, mockSetValues]);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
   const renderSearchInput = () => {

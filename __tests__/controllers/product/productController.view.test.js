@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import productModel from "../../../models/productModel.js";
 import categoryModel from "../../../models/categoryModel.js";
 
@@ -37,10 +41,15 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     };
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   // ============================================================
   // 1. getSingleProductController
   // ============================================================
   it("should fetch a single product successfully", async () => {
+    // Arrange
     const mockProduct = { 
       name: "Test Product", 
       slug: "test-product",
@@ -56,8 +65,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params.slug = "test-product";
+
+    // Act
     await getSingleProductController(req, res);
 
+    // Assert
     expect(productModel.findOne).toHaveBeenCalledWith({ slug: "test-product" });
     expect(selectMock).toHaveBeenCalledWith("-photo");
     expect(populateMock).toHaveBeenCalledWith("category");
@@ -70,6 +82,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle error when product is not found", async () => {
+    // Arrange
     const selectMock = jest.fn().mockReturnThis();
     const populateMock = jest.fn().mockResolvedValue(null);
     
@@ -79,8 +92,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params.slug = "non-existent-product";
+
+    // Act
     await getSingleProductController(req, res);
 
+    // Assert
     expect(productModel.findOne).toHaveBeenCalledWith({ slug: "non-existent-product" });
     expect(selectMock).toHaveBeenCalledWith("-photo");
     expect(populateMock).toHaveBeenCalledWith("category");
@@ -92,6 +108,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle errors in fetching a single product", async () => {
+    // Arrange
     const mockError = new Error("Database error");
 
     const selectMock = jest.fn().mockReturnThis();
@@ -103,8 +120,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params.slug = "test-product";
+
+    // Act
     await getSingleProductController(req, res);
     
+    // Assert
     expect(productModel.findOne).toHaveBeenCalledWith({ slug: "test-product" });
     expect(selectMock).toHaveBeenCalledWith("-photo");
     expect(populateMock).toHaveBeenCalledWith("category");
@@ -119,6 +139,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   // 2. productPhotoController
   // ============================================================
   it("should fetch product photo successfully", async () => {
+    // Arrange
     const mockPhotoData = Buffer.from("mock photo data");
     const mockContentType = "image/png";
   
@@ -134,8 +155,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params.pid = "123";
+
+    // Act
     await productPhotoController(req, res);
 
+    // Assert
     expect(productModel.findById).toHaveBeenCalledWith("123");
     expect(selectMock).toHaveBeenCalledWith("photo");
 
@@ -145,6 +169,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle error when product is missing", async () => {
+    // Arrange
     const selectMock = jest.fn().mockReturnValue(null);
 
     productModel.findById.mockReturnValue({
@@ -152,8 +177,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params.pid = "123";
+
+    // Act
     await productPhotoController(req, res);
 
+    // Assert
     expect(productModel.findById).toHaveBeenCalledWith("123");
     expect(selectMock).toHaveBeenCalledWith("photo");
 
@@ -164,6 +192,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle error when photo is missing", async () => {
+    // Arrange
     const selectMock = jest.fn().mockReturnValue({
       photo: null,
     });
@@ -173,8 +202,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params.pid = "123";
+
+    // Act
     await productPhotoController(req, res);
 
+    // Assert
     expect(productModel.findById).toHaveBeenCalledWith("123");
     expect(selectMock).toHaveBeenCalledWith("photo");
 
@@ -185,6 +217,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle errors in fetching photo", async () => {
+    // Arrange
     const mockError = new Error("Database error");
 
     const selectMock = jest.fn().mockRejectedValue(mockError);
@@ -194,8 +227,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params.pid = "123";
+
+    // Act
     await productPhotoController(req, res);
 
+    // Assert
     expect(productModel.findById).toHaveBeenCalledWith("123");
     expect(selectMock).toHaveBeenCalledWith("photo");
 
@@ -209,6 +245,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   // 3. relatedProductController
   // ============================================================
   it("should fetch related products successfully", async () => {
+    // Arrange
     const mockProducts = [
       { name: "Related Product 1" },
       { name: "Related Product 2" },
@@ -225,8 +262,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params = { pid: "123", cid: "456" };
+
+    // Act
     await relatedProductController(req, res);
 
+    // Assert
     expect(productModel.find).toHaveBeenCalledWith({
       category: "456",
       _id: { $ne: "123" },
@@ -243,6 +283,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should have no error when no related products are found", async () => {
+    // Arrange
     const selectMock = jest.fn().mockReturnThis();
     const limitMock = jest.fn().mockReturnThis();
     const populateMock = jest.fn().mockResolvedValue([]);
@@ -254,8 +295,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params = { pid: "123", cid: "456" };
+
+    // Act
     await relatedProductController(req, res);
 
+    // Assert
     expect(productModel.find).toHaveBeenCalledWith({
       category: "456",
       _id: { $ne: "123" },
@@ -271,6 +315,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle errors in fetching related products", async () => {
+    // Arrange
     const mockError = new Error("Database error");
 
     const selectMock = jest.fn().mockReturnThis();
@@ -284,8 +329,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params = { pid: "123", cid: "456" };
+
+    // Act
     await relatedProductController(req, res);
 
+    // Assert
     expect(productModel.find).toHaveBeenCalledWith({
       category: "456",
       _id: { $ne: "123" },
@@ -304,6 +352,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   // 4. productCategoryController
   // ============================================================
   it("should fetch products by category successfully with pagination", async () => {
+    // Arrange
     const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
     const mockProducts = [
       { name: "Product 1", category: mockCategory },
@@ -335,8 +384,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     productModel.countDocuments.mockResolvedValue(10);
 
     req.params = { slug: "test-category", page: "1" };
+
+    // Act
     await productCategoryController(req, res);
 
+    // Assert
     expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "test-category" });
     expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
     expect(selectMock).toHaveBeenCalledWith("-photo");
@@ -356,6 +408,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should fetch products with correct pagination offset for page 2", async () => {
+    // Arrange
     const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
     const mockProducts = [
       { name: "Product 4", category: mockCategory },
@@ -386,8 +439,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     productModel.countDocuments.mockResolvedValue(10);
 
     req.params = { slug: "test-category", page: "2" };
+
+    // Act
     await productCategoryController(req, res);
 
+    // Assert
     expect(skipMock).toHaveBeenCalledWith(3);
     expect(limitMock).toHaveBeenCalledWith(3);
     
@@ -398,11 +454,15 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle error when no category is found", async () => {
+    // Arrange
     categoryModel.findOne.mockResolvedValue(null);
     
     req.params.slug = "non-existent-category";
+
+    // Act
     await productCategoryController(req, res);
 
+    // Assert
     expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "non-existent-category" });
 
     expect(res.status).toHaveBeenCalledWith(404);
@@ -412,6 +472,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should have no error when no products in category are found on page 1", async () => {
+    // Arrange
     const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
 
     const selectMock = jest.fn();
@@ -438,8 +499,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     productModel.countDocuments.mockResolvedValue(0);
 
     req.params = { slug: "test-category" };
+
+    // Act
     await productCategoryController(req, res);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(200);
     const sentData = res.send.mock.calls[0][0];
     expect(sentData.success).toBe(true);
@@ -447,6 +511,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should return empty products for page beyond available pages", async () => {
+    // Arrange
     const mockCategory = { _id: "456", name: "Test Category", slug: "test-category" };
 
     const selectMock = jest.fn();
@@ -473,8 +538,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     productModel.countDocuments.mockResolvedValue(5);
 
     req.params = { slug: "test-category", page: "5" };
+
+    // Act
     await productCategoryController(req, res);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(200);
     const sentData = res.send.mock.calls[0][0];
     expect(sentData.success).toBe(true);
@@ -482,13 +550,17 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle errors in fetching products by category (category)", async () => {
+    // Arrange
     const mockError = new Error("Database error");
 
     categoryModel.findOne.mockRejectedValue(mockError);
 
     req.params.slug = "test-category";
+
+    // Act
     await productCategoryController(req, res);
 
+    // Assert
     expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "test-category" });
     expect(res.status).toHaveBeenCalledWith(400);
     const sentData = res.send.mock.calls[0][0];
@@ -497,6 +569,7 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
   });
 
   it("should handle errors in fetching products by category (product)", async () => {
+    // Arrange
     const mockError = new Error("Database error");
 
     const selectMock = jest.fn().mockReturnThis();
@@ -514,8 +587,11 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     });
 
     req.params = { slug: "test-category", page: "1" };
+
+    // Act
     await productCategoryController(req, res);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(400);
     const sentData = res.send.mock.calls[0][0];
     expect(sentData.success).toBe(false);

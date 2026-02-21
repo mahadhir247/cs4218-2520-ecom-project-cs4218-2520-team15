@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import React from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -74,6 +78,10 @@ describe("Category Product Page", () => {
     // Reset all mocks
     jest.clearAllMocks();
 
+    // Hide away console output for testing
+    jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
+
     mockNavigate = jest.fn();
     mockSetCart = jest.fn();
     mockCart = [];
@@ -93,6 +101,10 @@ describe("Category Product Page", () => {
     });
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const renderCategoryProduct = () => {
     return render(
       <BrowserRouter>
@@ -105,30 +117,39 @@ describe("Category Product Page", () => {
   // Component Rendering
   // ============================================================
   it("displays category name when data is loaded", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText(/Category - Electronics/i)).toBeInTheDocument();
     });
   });
 
   it("displays product count correctly", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText(/Showing 3 of 3 result\(s\)/i)).toBeInTheDocument();
     });
   });
 
   it("renders all products in the category", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("Laptop")).toBeInTheDocument();
       expect(screen.getByText("Smartphone")).toBeInTheDocument();
@@ -137,10 +158,13 @@ describe("Category Product Page", () => {
   });
 
   it("displays product images with correct attributes", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       const laptopImage = screen.getByAltText("Laptop");
       expect(laptopImage).toBeInTheDocument();
@@ -152,10 +176,13 @@ describe("Category Product Page", () => {
   });
 
   it("displays product prices in USD format", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("$999.99")).toBeInTheDocument();
       expect(screen.getByText("$699.99")).toBeInTheDocument();
@@ -164,10 +191,13 @@ describe("Category Product Page", () => {
   });
 
   it("truncates product descriptions to 60 characters", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText(/High-performance laptop with amazing features and great ba/i)).toBeInTheDocument();
     });
@@ -177,10 +207,13 @@ describe("Category Product Page", () => {
   // API Calls
   // ============================================================
   it("fetches products by category on mount", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
         "/api/v1/product/product-category/electronics/1"
@@ -189,19 +222,22 @@ describe("Category Product Page", () => {
   });
 
   it("handles error when fetching products", async () => {
+    // Arrange
     const consoleLogSpy = jest.spyOn(console, "log");
     axios.get.mockRejectedValueOnce(new Error("Network Error"));
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
     });
 
-    consoleLogSpy.mockRestore();
   });
 
   it("sets loading state while fetching", async () => {
+    // Arrange
     let resolvePromise;
     const promise = new Promise((resolve) => {
       resolvePromise = resolve;
@@ -209,8 +245,10 @@ describe("Category Product Page", () => {
 
     axios.get.mockReturnValue(promise);
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     // Loading state should be true initially
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalled();
@@ -228,6 +266,7 @@ describe("Category Product Page", () => {
   // Pagination - Load More Feature
   // ============================================================
   it("shows Load More button when there are more products", async () => {
+    // Arrange
     const partialResponse = {
       ...mockApiResponse,
       products: [mockProducts[0], mockProducts[1]], // Only 2 products
@@ -236,18 +275,23 @@ describe("Category Product Page", () => {
 
     axios.get.mockResolvedValueOnce({ data: partialResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("Load More")).toBeInTheDocument();
     });
   });
 
   it("does not show Load More button when all products are loaded", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("Laptop")).toBeInTheDocument();
     });
@@ -256,6 +300,7 @@ describe("Category Product Page", () => {
   });
 
   it("loads more products when Load More button is clicked", async () => {
+    // Arrange
     const firstPageResponse = {
       category: mockCategory,
       products: [mockProducts[0], mockProducts[1]],
@@ -281,9 +326,11 @@ describe("Category Product Page", () => {
     // Second page load
     axios.get.mockResolvedValueOnce({ data: secondPageResponse });
 
+    // Act
     const loadMoreButton = screen.getByText("Load More");
     fireEvent.click(loadMoreButton);
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
         "/api/v1/product/product-category/electronics/2"
@@ -296,6 +343,7 @@ describe("Category Product Page", () => {
   });
 
   it("displays Loading.. text while loading more products", async () => {
+    // Arrange
     const firstPageResponse = {
       category: mockCategory,
       products: [mockProducts[0], mockProducts[1]],
@@ -317,9 +365,11 @@ describe("Category Product Page", () => {
     });
     axios.get.mockReturnValue(promise);
 
+    // Act
     const loadMoreButton = screen.getByText("Load More");
     fireEvent.click(loadMoreButton);
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("Loading...")).toBeInTheDocument();
     });
@@ -335,6 +385,7 @@ describe("Category Product Page", () => {
   });
 
   it("appends new products to existing products on Load More", async () => {
+    // Arrange
     const firstPageResponse = {
       category: mockCategory,
       products: [mockProducts[0], mockProducts[1]],
@@ -358,9 +409,11 @@ describe("Category Product Page", () => {
 
     axios.get.mockResolvedValueOnce({ data: secondPageResponse });
 
+    // Act
     const loadMoreButton = screen.getByText("Load More");
     fireEvent.click(loadMoreButton);
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("Laptop")).toBeInTheDocument();
       expect(screen.getByText("Smartphone")).toBeInTheDocument();
@@ -372,13 +425,16 @@ describe("Category Product Page", () => {
   // Cart - ADD TO CART Feature
   // ============================================================
   it("adds product to cart when ADD TO CART is clicked", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
     await act(async () => {renderCategoryProduct()});
 
+    // Act
     const addToCartButtons = screen.getAllByText("ADD TO CART");
     fireEvent.click(addToCartButtons[0]); // Add Laptop
 
+    // Assert
     expect(mockSetCart).toHaveBeenCalledWith([mockProducts[0]]);
     expect(window.localStorage.setItem).toHaveBeenCalledWith(
       "cart",
@@ -388,6 +444,7 @@ describe("Category Product Page", () => {
   });
 
   it("appends product to existing cart", async () => {
+    // Arrange
     const existingCart = [{ _id: "existing1", name: "Existing Product" }];
     useCart.mockReturnValue([existingCart, mockSetCart]);
 
@@ -395,9 +452,11 @@ describe("Category Product Page", () => {
 
     await act(async () => {renderCategoryProduct()});
 
+    // Act
     const addToCartButtons = screen.getAllByText("ADD TO CART");
     fireEvent.click(addToCartButtons[0]); // Add Laptop
 
+    // Assert
     expect(mockSetCart).toHaveBeenCalledWith([...existingCart, mockProducts[0]]);
     expect(window.localStorage.setItem).toHaveBeenCalledWith(
       "cart",
@@ -410,6 +469,7 @@ describe("Category Product Page", () => {
   // Navigation and Hook
   // ============================================================
   it("navigates to correct product when More Details is clicked", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
     await act(async () => {renderCategoryProduct()});
@@ -418,13 +478,16 @@ describe("Category Product Page", () => {
       expect(screen.getByText("Laptop")).toBeInTheDocument();
     });
 
+    // Act
     const moreDetailsButtons = screen.getAllByText("More Details");
     fireEvent.click(moreDetailsButtons[0]);
 
+    // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/product/laptop");
   });
 
   it("reset state when category slug changes", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
     await act(async () => {renderCategoryProduct()});
@@ -444,8 +507,10 @@ describe("Category Product Page", () => {
 
     axios.get.mockResolvedValueOnce({ data: newMockApiResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
         "/api/v1/product/product-category/books/1"
@@ -454,14 +519,18 @@ describe("Category Product Page", () => {
   });
 
   it("does not fetch products when slug is undefined", async () => {
+    // Arrange
     useParams.mockReturnValue({ slug: undefined });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     expect(axios.get).not.toHaveBeenCalled();
   });
 
   it("refetches products when page changes", async () => {
+    // Arrange
     const firstPageResponse = {
       category: mockCategory,
       products: [mockProducts[0]],
@@ -485,9 +554,11 @@ describe("Category Product Page", () => {
       }
     });
 
+    // Act
     const loadMoreButton = screen.getByText("Load More");
     fireEvent.click(loadMoreButton);
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledTimes(2);
     });
@@ -497,6 +568,7 @@ describe("Category Product Page", () => {
   // Empty State Handling
   // ============================================================
   it("handles category with no products", async () => {
+    // Arrange
     const emptyResponse = {
       category: mockCategory,
       products: [],
@@ -505,8 +577,10 @@ describe("Category Product Page", () => {
 
     axios.get.mockResolvedValueOnce({ data: emptyResponse });
 
+    // Act
     await act(async () => {renderCategoryProduct()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText(/Category - Electronics/i)).toBeInTheDocument();
       expect(screen.getByText(/Showing 0 of 0 result\(s\)/i)).toBeInTheDocument();

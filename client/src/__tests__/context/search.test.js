@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import React from "react";
 import { render, screen, act } from "@testing-library/react";
 import { SearchProvider, useSearch } from "../../context/search";

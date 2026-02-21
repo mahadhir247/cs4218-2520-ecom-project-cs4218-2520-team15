@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import productModel from "../../../models/productModel.js";
 
 // Mock braintree before importing the controller
@@ -30,6 +34,10 @@ describe("Product Controller Unit Tests (related to Product Search)", () => {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
     };
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
   // ============================================================

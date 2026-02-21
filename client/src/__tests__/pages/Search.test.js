@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import React from "react";
 import toast from "react-hot-toast";
 import Search from "../../pages/Search.js";
@@ -96,6 +100,10 @@ describe("Search Page", () => {
       },
       writable: true,
     });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
   const renderSearch = () => {
