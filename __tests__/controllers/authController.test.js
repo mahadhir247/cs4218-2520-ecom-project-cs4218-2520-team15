@@ -286,7 +286,7 @@ describe("Auth Controller Test", () => {
             req.body = {
                 // email: 'test@gmail.com',
                 answer: 'test',
-                newPassword: 'test'
+                password: 'test'
             }
 
             await forgotPasswordController(req, res);
@@ -299,7 +299,7 @@ describe("Auth Controller Test", () => {
             req.body = {
                 email: 'test@gmail.com',
                 // answer: 'test',
-                newPassword: 'test'
+                password: 'test'
             }
 
             await forgotPasswordController(req, res);
@@ -312,7 +312,7 @@ describe("Auth Controller Test", () => {
             req.body = {
                 email: 'test@gmail.com',
                 answer: 'test',
-                // newPassword: 'test'
+                // password: 'test'
             }
 
             await forgotPasswordController(req, res);
@@ -326,7 +326,7 @@ describe("Auth Controller Test", () => {
             req.body = {
                 email: 'test@gmail.com',
                 answer: 'test',
-                newPassword: 'test'
+                password: 'test'
             }
             userModel.findOne.mockResolvedValue(null);
 
@@ -341,7 +341,7 @@ describe("Auth Controller Test", () => {
             req.body = {
                 email: 'test@gmail.com',
                 answer: 'test',
-                newPassword: 'test'
+                password: 'test'
             }
             userModel.findOne.mockResolvedValue({ _id: 1 });
             hashPassword.mockResolvedValue('mockHashedPassword');
@@ -357,7 +357,7 @@ describe("Auth Controller Test", () => {
             req.body = {
                 email: 'test@gmail.com',
                 answer: 'test',
-                newPassword: 'test'
+                password: 'test'
             }
             userModel.findOne.mockImplementation(() => { throw mockError });
             jest.spyOn(global.console, 'log').mockImplementation(() => {});
