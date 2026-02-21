@@ -54,7 +54,7 @@ describe("Contact", () => {
     expect(
       screen.getByText(/For any query or info about product, feel free to call anytime/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/We are available 24X7/i)).toBeInTheDocument();
+    expect(screen.getByText(/We are available 24\/7/i)).toBeInTheDocument();
   });
 
   test("renders email contact information", () => {
