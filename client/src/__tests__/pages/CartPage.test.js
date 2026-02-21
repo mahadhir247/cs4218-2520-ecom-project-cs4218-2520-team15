@@ -93,7 +93,7 @@ describe("CartPage", () => {
             expect(screen.getByText(/Your Cart Is Empty/i)).toBeInTheDocument();
         });
 
-        test("shows login button and navigates to login with cart state when guest has items", async () => {
+        test("shows login button for guest user and navigates to login with cart state", async () => {
             useAuth.mockReturnValue(GUEST_AUTH);
             useCart.mockReturnValue([SINGLE_ITEM, jest.fn()]);
 
@@ -101,7 +101,7 @@ describe("CartPage", () => {
                 render(<CartPage />);
             });
 
-            const loginButton = screen.getByText("Plase Login to checkout");
+            const loginButton = screen.getByText("Please Login to checkout");
             expect(loginButton).toBeInTheDocument();
             fireEvent.click(loginButton);
 
