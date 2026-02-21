@@ -17,12 +17,12 @@ export default {
     "middlewares/**",
     "config/**",
   ],
-  //   coverageThreshold: {
-  //     global: {
-  //       lines: 100,
-  //       functions: 100,
-  //     },
-  //   },
+  coverageThreshold: {
+    global: {
+      lines: 80,
+      functions: 80,
+    },
+  },
 
   // mock env variables
   setupFiles: ["<rootDir>/setEnvVars.js"],
