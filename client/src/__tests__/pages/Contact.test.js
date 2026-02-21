@@ -99,4 +99,34 @@ describe("Contact", () => {
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("src", "/images/contactus.jpeg");
   });
+  
+  test("renders mail icon", () => {
+    render(
+      <BrowserRouter>
+        <Contact />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByTestId("mail-icon")).toBeInTheDocument();
+  });
+
+  test("renders phone icon", () => {
+    render(
+      <BrowserRouter>
+        <Contact />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByTestId("phone-icon")).toBeInTheDocument();
+  });
+
+  test("renders support icon", () => {
+    render(
+      <BrowserRouter>
+        <Contact />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByTestId("support-icon")).toBeInTheDocument();
+  });
 });
