@@ -1,3 +1,8 @@
+/*
+  * Name: Lim Jin Yin
+  * Student ID: A0256976H
+*/
+
 import { render, screen, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import Users from '../../../pages/admin/Users';
