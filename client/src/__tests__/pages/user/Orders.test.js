@@ -1,3 +1,8 @@
+/*
+  * Name: Lim Jin Yin
+  * Student ID: A0256976H
+*/
+
 import { render, screen, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import Orders from '../../../pages/user/Orders';
@@ -127,6 +132,24 @@ describe('Orders page', () => {
     expect(productCards.length).toBe(0);
   });
 
+  it('uses index as key when order _id is missing', async () => {
+    const mockOrdersWithMissingId = [
+      { status: 'Processing', buyer: { name: 'Buyer 1' }, createdAt: new Date().toISOString(), payment: { success: true }, products: [] }
+    ];
+
+    axios.get.mockResolvedValueOnce({ data: mockOrdersWithMissingId });
+
+    render(
+      <AuthProvider>
+        <Orders />
+      </AuthProvider>
+    );
+
+    await waitFor(() => expect(axios.get).toHaveBeenCalledWith('/api/v1/auth/orders'));
+
+    expect(await screen.findByText('Buyer 1')).toBeInTheDocument();
+  });
+
   it('handles API failure without crashing (calls console.log)', async () => {
     const err = new Error('Network Error');
     axios.get.mockRejectedValueOnce(err);
@@ -148,5 +171,5 @@ describe('Orders page', () => {
     expect(productCards.length).toBe(0);
 
     consoleSpy.mockRestore();
-});
+  });
 });
