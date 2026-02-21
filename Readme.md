@@ -8,7 +8,7 @@
 
 <u>**INSERT URL HERE**</u>
 
-### Mahadhir
+### Mahadhir Bin Mohd Ismail, A0252808B
 
 - Protected Routes
   - context/auth.js
@@ -33,7 +33,7 @@
 
 ---
 
-### Delon
+### Lee Guan Kai Delon, A0273286W
 
 - Admin Dashboard
   - components/AdminMenu.js
@@ -58,7 +58,7 @@
 
 ---
 
-### Inez
+### Kok Fangyu Inez, A0258672R
 
 - Product
   - pages/ProductDetails.js
@@ -85,7 +85,7 @@
 
 ---
 
-### Jin Yin
+### Lim Jin Yin, A0256976H
 
 - General
   - models/userModel.js
@@ -110,7 +110,7 @@
 
 ---
 
-### Qin Xu
+### Tan Qin Xu, A0213002J
 
 - Cart
   - context/cart.js
