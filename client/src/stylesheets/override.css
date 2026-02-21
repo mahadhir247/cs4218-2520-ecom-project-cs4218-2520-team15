@@ -1,0 +1,5 @@
+/* Override bootstrap styling */
+
+.ant-select.form-select {
+  background: none !important;
+}

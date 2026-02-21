@@ -44,7 +44,7 @@ describe("Category Product Page", () => {
     _id: "p1",
     name: "Laptop",
     slug: "laptop",
-    description: "High-performance laptop with amazing features and great batteyr life",
+    description: "High-performance laptop with amazing features and great battery life",
     price: 999.99,
     category: mockCategory
   }, {
@@ -243,7 +243,7 @@ describe("Category Product Page", () => {
     });
   });
 
-  it("does not show Load More button when all products ate loaded", async () => {
+  it("does not show Load More button when all products are loaded", async () => {
     axios.get.mockResolvedValueOnce({ data: mockApiResponse });
 
     await act(async () => {renderCategoryProduct()});
