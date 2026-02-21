@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import React from "react";
 import axios from "axios";
 import SearchInput from "../../../components/Form/SearchInput.js";
