@@ -98,7 +98,7 @@ const AdminOrders = () => {
                           src={`/api/v1/product/product-photo/${p._id}`}
                           className="card-img-top"
                           alt={p.name}
-                          width={"10px"}
+                          width={"100px"}
                           height={"250px"}
                         />
                       </div>

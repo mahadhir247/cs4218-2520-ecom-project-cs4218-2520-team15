@@ -55,5 +55,7 @@ describe('getAllOrdersController', () => {
         error: err,
       })
     );
+
+    logSpy.mockRestore();
   });
 });
