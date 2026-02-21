@@ -1,4 +1,6 @@
-// Kok Fangyu Inez, A0258672R
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
 
 import productModel from "../../../models/productModel.js";
 
