@@ -93,6 +93,10 @@ describe("Product Details Page", () => {
     });
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const renderProductDetails = () => {
     return render(
       <BrowserRouter>

@@ -41,6 +41,10 @@ describe("Product Controller Unit Tests (related to Product View)", () => {
     };
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   // ============================================================
   // 1. getSingleProductController
   // ============================================================

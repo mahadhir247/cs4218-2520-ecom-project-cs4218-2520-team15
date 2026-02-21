@@ -101,6 +101,10 @@ describe("Category Product Page", () => {
     });
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const renderCategoryProduct = () => {
     return render(
       <BrowserRouter>

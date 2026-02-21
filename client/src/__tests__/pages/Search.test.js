@@ -102,6 +102,10 @@ describe("Search Page", () => {
     });
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const renderSearch = () => {
     return render(
       <BrowserRouter>

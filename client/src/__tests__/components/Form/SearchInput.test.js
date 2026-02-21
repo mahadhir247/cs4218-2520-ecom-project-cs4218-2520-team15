@@ -43,6 +43,10 @@ describe("Search Input Form Component", () => {
     useSearch.mockReturnValue([mockValues, mockSetValues]);
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const renderSearchInput = () => {
     return render(
       <BrowserRouter>

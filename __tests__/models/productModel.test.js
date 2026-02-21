@@ -17,6 +17,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
+  jest.restoreAllMocks();
 });
 
 describe("Product Model Test", () => {

@@ -120,6 +120,10 @@ describe("Home Page", () => {
     });
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const renderHomePage = () => {
     return render(
       <BrowserRouter>

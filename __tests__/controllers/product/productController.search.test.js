@@ -36,6 +36,10 @@ describe("Product Controller Unit Tests (related to Product Search)", () => {
     };
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   // ============================================================
   // Input Validation
   // ============================================================
