@@ -156,7 +156,7 @@ describe("Search Page", () => {
       await act(async () => {renderSearch()});
 
       // Assert
-      expect(screen.queryAllByRole("img")).toHaveLength(0);
+      expect(document.getElementsByClassName("card")).toHaveLength(0);
     });
   });
 
@@ -202,7 +202,7 @@ describe("Search Page", () => {
       await act(async () => {renderSearch()});
 
       // Assert
-      expect(screen.getAllByRole("img")).toHaveLength(mockSearchProducts.length);
+      expect(document.getElementsByClassName("card")).toHaveLength(mockSearchProducts.length);
     });
 
     it("should display the product name on each card", async () => {
