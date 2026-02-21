@@ -89,24 +89,28 @@
 
 - General
   - models/userModel.js
+  - models/orderModel.js
 
 - Profile
   - pages/user/Profile.js
+  - controllers/authController.js
+    - updateProfileController
 
 - Order
   - pages/user/Orders.js
   - controllers/authController.js
-    - updateProfileController
     - getOrdersController
-    - getAllOrdersController
-    - orderStatusController
-  - models/orderModel.js
 
 - Admin View Orders
   - pages/admin/AdminOrders.js
+  - controllers/authController.js
+    - getAllOrdersController
+    - orderStatusController
 
 - Admin View Users
   - pages/admin/Users.js
+  - controllers/authController.js
+    - getAllUsersController
 
 ---
 
