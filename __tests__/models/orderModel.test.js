@@ -1,3 +1,8 @@
+/*
+  * Name: Lim Jin Yin
+  * Student ID: A0256976H
+*/
+
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import orderModel from "../../models/orderModel.js";
