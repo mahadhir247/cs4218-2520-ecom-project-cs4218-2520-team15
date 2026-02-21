@@ -1,7 +1,15 @@
+/* Name: Lee Guan Kai Delon
+ * Student No: A0273286W
+ */
+
 import {
   createProductController,
+  deleteProductController,
   updateProductController,
 } from "../../../controllers/productController";
+
+jest.mock("../../../models/productModel");
+jest.mock("../../../models/orderModel");
 
 jest.mock(
   "slugify",
@@ -10,8 +18,7 @@ jest.mock(
 
 jest.mock("fs", () => ({ readFileSync: jest.fn(() => "mock-file") }));
 
-jest.mock("../../../models/productModel");
-
+import orderModel from "../../../models/orderModel";
 import productModel from "../../../models/productModel";
 
 describe("createProductController function", () => {
@@ -875,6 +882,69 @@ describe("updateProductController function", () => {
           },
         },
       });
+    });
+  });
+});
+
+describe("deleteProductController function", () => {
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn().mockReturnThis(),
+  };
+
+  beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should delete product correctly", async () => {
+    const mockReq = { params: { pid: "1" } };
+    orderModel.countDocuments.mockResolvedValueOnce(0);
+    productModel.findByIdAndDelete.mockResolvedValueOnce();
+
+    await deleteProductController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Product deleted successfully",
+    });
+  });
+
+  it("should return error if product has orders", async () => {
+    const mockReq = { params: { pid: "1" } };
+    orderModel.countDocuments.mockResolvedValueOnce(3);
+
+    await deleteProductController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Unable to delete product with orders",
+    });
+  });
+
+  it("should return error if server issues", async () => {
+    const mockReq = { params: { pid: "1" } };
+    orderModel.countDocuments.mockResolvedValueOnce(0);
+    productModel.findByIdAndDelete.mockRejectedValue(
+      new Error("Delete product error"),
+    );
+
+    await deleteProductController(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.send).toHaveBeenCalledWith({
+      success: false,
+      error: new Error("Delete product error"),
+      message: "Error in deleting product",
     });
   });
 });
