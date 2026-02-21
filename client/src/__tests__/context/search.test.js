@@ -127,6 +127,7 @@ describe("SearchContext", () => {
 
       // Assert
       expect(capturedValues[0].results).toEqual(existingResults);
+      expect(capturedValues[0].keyword).toEqual("boots"); // only keyword updated
     });
   });
 
