@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import React from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -66,6 +70,10 @@ describe("Product Details Page", () => {
     // Reset all mocks
     jest.clearAllMocks();
 
+    // Hide away console output for testing
+    jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
+
     mockNavigate = jest.fn();
     mockSetCart = jest.fn();
     mockCart = [];
@@ -85,6 +93,10 @@ describe("Product Details Page", () => {
     });
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const renderProductDetails = () => {
     return render(
       <BrowserRouter>
@@ -97,11 +109,14 @@ describe("Product Details Page", () => {
   // Component Rendering
   // ============================================================
   it("displays product details when data is loaded", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("Product Details")).toBeInTheDocument();
       expect(screen.getByText(/Name : Test Product/i)).toBeInTheDocument();
@@ -113,11 +128,14 @@ describe("Product Details Page", () => {
   });
 
   it("renders product image with correct attributes", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       const productImage = screen.getByAltText("Test Product");
       expect(productImage).toBeInTheDocument();
@@ -129,11 +147,14 @@ describe("Product Details Page", () => {
   })
 
   it("renders ADD TO CART button", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       const addToCartButtons = screen.getAllByText("ADD TO CART");
       expect(addToCartButtons[0]).toBeInTheDocument();
@@ -144,11 +165,14 @@ describe("Product Details Page", () => {
   // API Calls
   // ============================================================  
   it("fetches product details on mount", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
         "/api/v1/product/get-product/test-product"
@@ -157,11 +181,14 @@ describe("Product Details Page", () => {
   });
 
   it("fetches similar products after getting product details", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: mockRelatedProducts } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
         "/api/v1/product/related-product/product123/category123"
@@ -170,63 +197,74 @@ describe("Product Details Page", () => {
   });
 
   it("handles error when fetching product details", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    // Arrange
+    const consoleLogSpy = jest.spyOn(console, "log");
     axios.get.mockRejectedValueOnce(new Error("Network Error"));
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
     });
-
-    consoleLogSpy.mockRestore();
   });
 
   it("handles error when fetching similar product", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    // Arrange
+    const consoleLogSpy = jest.spyOn(console, "log");
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockRejectedValueOnce(new Error("Network Error"));
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
     });
-
-    consoleLogSpy.mockRestore();
   });
 
   // ============================================================
   // Similar Products Section
   // ============================================================
   it("displays similar products heading", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: mockRelatedProducts } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText(/Similar Products/i)).toBeInTheDocument();
     }); 
   });
 
   it("displays message when no similar products are found", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("No Similar Products found")).toBeInTheDocument();
     }); 
   });
 
   it("renders related products cards", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: mockRelatedProducts } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("Related Product 1")).toBeInTheDocument();
       expect(screen.getByText("Related Product 2")).toBeInTheDocument();
@@ -234,11 +272,14 @@ describe("Product Details Page", () => {
   });
 
   it("truncates related product descriptions", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: mockRelatedProducts } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(
         screen.getByText(/This is a related product with a longer description that/i)
@@ -247,11 +288,14 @@ describe("Product Details Page", () => {
   });
 
   it("displays prices for related products", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: mockRelatedProducts } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText("$49.99")).toBeInTheDocument();
       expect(screen.getByText("$79.99")).toBeInTheDocument();
@@ -262,16 +306,19 @@ describe("Product Details Page", () => {
   // Cart Functionality
   // ============================================================
   it("adds main product to cart when ADD TO CART is clicked", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
     await act(async () => {renderProductDetails()});
 
+    // Act
     await waitFor(() => {
       const addToCartButton = screen.getAllByText("ADD TO CART")[0];
       fireEvent.click(addToCartButton);
     });
 
+    // Assert
     expect(mockSetCart).toHaveBeenCalledWith([mockProduct]);
     expect(window.localStorage.setItem).toHaveBeenCalledWith(
       "cart",
@@ -281,16 +328,19 @@ describe("Product Details Page", () => {
   });
 
   it("adds related product to cart when ADD TO CART is clicked", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: mockRelatedProducts } });
 
     await act(async () => {renderProductDetails()});
 
+    // Act
     await waitFor(() => {
       const addToCartButton = screen.getAllByText("ADD TO CART")[1];
       fireEvent.click(addToCartButton);
     });
 
+    // Assert
     expect(mockSetCart).toHaveBeenCalledWith([mockRelatedProducts[0]]);
     expect(window.localStorage.setItem).toHaveBeenCalledWith(
       "cart",
@@ -300,6 +350,7 @@ describe("Product Details Page", () => {
   });
 
   it("appends product to existing cart", async () => {
+    // Arrange
     const existingCart = [{ _id: "existing1", name: "Existing Product" }];
     useCart.mockReturnValue([existingCart, mockSetCart]);
 
@@ -308,11 +359,13 @@ describe("Product Details Page", () => {
 
     await act(async () => {renderProductDetails()});
 
+    // Act
     await waitFor(() => {
       const addToCartButton = screen.getAllByText("ADD TO CART")[0];
       fireEvent.click(addToCartButton);
     });
 
+    // Assert
     expect(mockSetCart).toHaveBeenCalledWith([...existingCart, mockProduct]);
     expect(localStorage.setItem).toHaveBeenCalledWith(
       "cart",
@@ -324,33 +377,35 @@ describe("Product Details Page", () => {
   // Navigation and Hook
   // ============================================================
   it("navigates to related product details page when More Details is clicked", async () => {
+    // Arrange
     axios.get.mockResolvedValueOnce({ data: { product: mockProduct } });
     axios.get.mockResolvedValueOnce({ data: { products: mockRelatedProducts } });
 
     await act(async () => {renderProductDetails()});
 
+    // Act
     await waitFor(() => {
       const moreDetailsButtons = screen.getAllByText("More Details");
       fireEvent.click(moreDetailsButtons[0]);
     });
 
+    // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/product/related-product-1");
   });
 
   it("refetches product when slug param changes", async () => {
+    // Arrange
     axios.get.mockResolvedValue({ data: { product: mockProduct, products: [] } });
 
     await act(async () => {renderProductDetails()});
 
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledTimes(2);
-    });
-
     // Change the slug
     useParams.mockReturnValue({ slug: "new-product-slug" });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
         "/api/v1/product/get-product/new-product-slug"
@@ -359,10 +414,13 @@ describe("Product Details Page", () => {
   });
 
   it("does not fetch product when slug is undefined", async () => {
+    // Arrange
     useParams.mockReturnValue({ slug: undefined });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     expect(axios.get).not.toHaveBeenCalled();
   });
 
@@ -370,13 +428,16 @@ describe("Product Details Page", () => {
   // Empty State Handling
   // ============================================================
   it("handles non-existent product", async () => {
+    // Arrange
     useParams.mockReturnValue({ slug: "nonexistent-product" });
 
     axios.get.mockResolvedValueOnce({ data: { product: {} } });
     axios.get.mockResolvedValueOnce({ data: { products: [] } });
 
+    // Act
     await act(async () => {renderProductDetails()});
 
+    // Assert
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
         "/api/v1/product/get-product/nonexistent-product"

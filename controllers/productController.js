@@ -173,58 +173,88 @@ export const productPhotoController = async (req, res) => {
 //delete controller
 export const deleteProductController = async (req, res) => {
   try {
-    await productModel.findByIdAndDelete(req.params.pid).select("-photo");
+    const id = req.params.pid;
+    const ordersCount = await orderModel.countDocuments({ products: id });
+    if (ordersCount > 0) {
+      return res
+        .status(400)
+        .send({
+          success: false,
+          message: "Unable to delete product with orders",
+        });
+    }
+    await productModel.findByIdAndDelete(id);
     res.status(200).send({
       success: true,
-      message: "Product Deleted successfully",
+      message: "Product deleted successfully",
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error while deleting product",
+      message: "Error in deleting product",
       error,
     });
   }
 };
 
-//upate producta
+//update product
 export const updateProductController = async (req, res) => {
   try {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //alidation
+    //validation
     switch (true) {
       case !name:
-        return res.status(500).send({ error: "Name is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Name is required" });
       case !description:
-        return res.status(500).send({ error: "Description is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Description is required" });
       case !price:
-        return res.status(500).send({ error: "Price is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Price is required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Category is required" });
       case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res
+          .status(400)
+          .send({ success: false, message: "Quantity is required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(400)
+          .send({ success: false, message: "Photo should be less then 1MB" });
     }
 
+    const parsedShipping = shipping ? JSON.parse(shipping) : false; // shipping can be undefined, a string '0' or '1'
     const products = await productModel.findByIdAndUpdate(
       req.params.pid,
-      { ...req.fields, slug: slugify(name) },
-      { new: true }
+      {
+        ...req.fields,
+        slug: slugify(name),
+        shipping: parsedShipping,
+      },
+      { new: true },
     );
+    if (!products) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Product does not exist" });
+    }
     if (photo) {
       products.photo.data = fs.readFileSync(photo.path);
       products.photo.contentType = photo.type;
     }
     await products.save();
-    res.status(201).send({
+    res.status(200).send({
       success: true,
-      message: "Product Updated Successfully",
+      message: "Product updated successfully",
       products,
     });
   } catch (error) {
@@ -232,7 +262,7 @@ export const updateProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error in Updte product",
+      message: "Error in updating product",
     });
   }
 };
@@ -329,7 +359,17 @@ export const productListController = async (req, res) => {
 export const searchProductController = async (req, res) => {
   try {
     const { keyword } = req.params;
-    const resutls = await productModel
+
+    // Check for empty keyword
+    if (!keyword || keyword.trim().length === 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Search keyword is required",
+        results: [],
+      });
+    }
+
+    const results = await productModel
       .find({
         $or: [
           { name: { $regex: keyword, $options: "i" } },
@@ -337,12 +377,17 @@ export const searchProductController = async (req, res) => {
         ],
       })
       .select("-photo");
-    res.json(resutls);
+
+    res.status(200).send({
+      success: true,
+      message: "Products searched successfully",
+      results,
+    });
   } catch (error) {
     console.log(error);
-    res.status(400).send({
+    res.status(500).send({
       success: false,
-      message: "Error In Search Product API",
+      message: "Error in searching for products",
       error,
     });
   }

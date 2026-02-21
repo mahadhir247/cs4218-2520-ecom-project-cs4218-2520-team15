@@ -15,6 +15,7 @@ export default {
     "controllers/**",
     "helpers/**",
     "middlewares/**",
+    "config/**",
   ],
   //   coverageThreshold: {
   //     global: {

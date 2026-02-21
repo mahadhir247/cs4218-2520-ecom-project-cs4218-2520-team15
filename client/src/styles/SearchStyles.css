@@ -1,22 +1,22 @@
-.category {
+.search {
     flex-wrap: wrap;
     margin-top: 80px !important;
   }
-  .category .card {
+  .search .card {
     background-color: goldenrod;
     width: 18rem;
   }
-  .category .card-name-price {
+  .search .card-name-price {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
   }
   
-  .category .card-price {
+  .search .card-price {
     color: green;
     font-weight: bold;
   }
-  .category button {
+  .search button {
     border-radius: 0;
     width: 100%;
     border-top-left-radius: 5px;
@@ -25,14 +25,14 @@
     font-weight: bold;
   }
   
-  .category .card-text {
+  .search .card-text {
     color: rgb(90, 89, 89);
   }
   
-  .category .card img:hover {
+  .search .card img:hover {
     transform: scale(0.9);
   }
   
-  .category .card-img-top {
+  .search .card-img-top {
     height: 300px !important;
   }
