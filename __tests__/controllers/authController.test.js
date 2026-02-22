@@ -1,3 +1,7 @@
+/* Name: Mahadhir Bin Mohd Ismail
+ * Student No: A0252808B
+ */
+
 import { forgotPasswordController, loginController, registerController, testController } from "../../controllers/authController";
 import userModel from "../../models/userModel.js";
 import { hashPassword, comparePassword } from "../../helpers/authHelper.js";

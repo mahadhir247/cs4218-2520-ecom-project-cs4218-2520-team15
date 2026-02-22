@@ -1,3 +1,7 @@
+/* Name: Mahadhir Bin Mohd Ismail
+ * Student No: A0252808B
+ */
+
 import JWT from "jsonwebtoken";
 import userModel from "../../models/userModel";
 import { isAdmin, requireSignIn } from "../../middlewares/authMiddleware";
