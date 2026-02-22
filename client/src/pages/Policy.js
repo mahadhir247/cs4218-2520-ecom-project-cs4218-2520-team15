@@ -4,11 +4,11 @@ import Layout from "./../components/Layout";
 const Policy = () => {
   return (
     <Layout title={"Privacy Policy"}>
-      <div className="row contactus ">
-        <div className="col-md-6 ">
+      <div className="row policy">
+        <div className="col-md-6">
           <img
             src="/images/contactus.jpeg"
-            alt="contactus"
+            alt="policy"
             style={{ width: "100%" }}
           />
         </div>

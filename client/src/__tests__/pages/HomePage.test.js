@@ -1,3 +1,7 @@
+/* Name: Kok Fangyu Inez
+ * Student No: A0258672R
+ */
+
 import React from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -94,8 +98,9 @@ describe("Home Page", () => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Hide away console log for testing
+    // Hide away console output for testing
     jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
 
     mockNavigate = jest.fn();
     mockSetCart = jest.fn();
@@ -113,6 +118,10 @@ describe("Home Page", () => {
       },
       writable: true,
     });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
   const renderHomePage = () => {
