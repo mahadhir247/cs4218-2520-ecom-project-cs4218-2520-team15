@@ -1,3 +1,7 @@
+/* Name: Mahadhir Bin Mohd Ismail
+ * Student No: A0252808B
+ */
+
 import bcrypt from "bcrypt";
 import { hashPassword, comparePassword } from "../../helpers/authHelper";
 
