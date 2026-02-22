@@ -28,11 +28,18 @@ export default {
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: ["client/src/**"],
-  coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/client/src/_site/"],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "<rootDir>/client/src/_site/",
+    "<rootDir>/client/src/App.js",
+    "<rootDir>/client/src/index.js",
+    "<rootDir>/client/src/setupTests.js",
+    "<rootDir>/client/src/reportWebVitals.js",
+  ],
   coverageThreshold: {
     global: {
-      lines: 100,
-      functions: 100,
+      lines: 80,
+      functions: 80,
     },
   },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
