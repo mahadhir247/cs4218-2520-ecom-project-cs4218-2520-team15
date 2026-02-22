@@ -6,7 +6,7 @@
 
 ### MS1 CI URL
 
-<u>**INSERT URL HERE**</u>
+https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team15/actions/runs/22280898113/job/64451263552
 
 ### Mahadhir Bin Mohd Ismail, A0252808B
 
@@ -22,9 +22,8 @@
     - loginController
     - forgotPasswordController
     - testController
-
-- Login
   - pages/Auth/Login.js
+  - pages/Auth/ForgetPassword.js
 
 - General
   - components/Routes/Private.js
