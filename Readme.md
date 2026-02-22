@@ -23,7 +23,7 @@ https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team15/actions/ru
     - forgotPasswordController
     - testController
   - pages/Auth/Login.js
-  - pages/Auth/ForgetPassword.js
+  - pages/Auth/ForgotPassword.js
 
 - General
   - components/Routes/Private.js
