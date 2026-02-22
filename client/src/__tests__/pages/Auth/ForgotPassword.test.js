@@ -50,6 +50,10 @@ describe("ForgotPassword Component", () => {
     axios.get.mockResolvedValue({ data: { category: [] } });
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  })
+
   it("renders reset password page", async () => {
     const { getByText, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={["/forgot-password"]}>
@@ -194,8 +198,5 @@ describe("ForgotPassword Component", () => {
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(console.log).toHaveBeenCalledWith(mockError)
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
-
-    axios.post.mockRestore();
-    console.log.mockRestore();
   });
 });
