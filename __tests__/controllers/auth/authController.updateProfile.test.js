@@ -1,3 +1,8 @@
+/*
+  * Name: Lim Jin Yin
+  * Student ID: A0256976H
+*/
+
 import userModel from '../../../models/userModel.js';
 import { hashPassword } from '../../../helpers/authHelper.js';
 import { updateProfileController } from '../../../controllers/authController.js';

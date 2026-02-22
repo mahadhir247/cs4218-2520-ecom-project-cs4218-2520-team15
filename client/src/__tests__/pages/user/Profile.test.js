@@ -1,3 +1,8 @@
+/*
+  * Name: Lim Jin Yin
+  * Student ID: A0256976H
+*/
+
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import axios from 'axios';
@@ -121,6 +126,41 @@ describe('Profile Component', () => {
     expect(window.localStorage.setItem).toHaveBeenCalled();
     expect(toast.success).toHaveBeenCalledWith('Profile Updated Successfully');
   });
+
+  it('updates password when password is input', async () => {
+    const updatedUser = {
+      name: 'John Doe',
+      email: 'john@test.com',
+      phone: '88888888',
+      address: '123 Street',
+    };
+    axios.put.mockResolvedValueOnce({ data: { updatedUser } });
+
+    const { getByPlaceholderText, getByText } = renderProfile();
+
+    await waitFor(() => expect(getByPlaceholderText('Enter Your Name')).toHaveValue('John Doe'));
+
+    const passwordInput = getByPlaceholderText('Enter Your Password');
+
+    await act(async () => {
+      fireEvent.change(passwordInput, { target: { value: 'newpassword' } });
+      fireEvent.click(getByText('UPDATE'));
+    });
+
+    await waitFor(() => {
+      expect(axios.put).toHaveBeenCalledWith(
+        '/api/v1/auth/profile',
+        expect.objectContaining({
+          name: updatedUser.name,
+          email: updatedUser.email,
+          password: 'newpassword',
+          phone: updatedUser.phone,
+          address: updatedUser.address,
+        })
+      );
+    });
+  });
+
 
   it('shows error toast when axios.put rejects (single behavior)', async () => {
     axios.put.mockRejectedValueOnce(new Error('Update failed'));

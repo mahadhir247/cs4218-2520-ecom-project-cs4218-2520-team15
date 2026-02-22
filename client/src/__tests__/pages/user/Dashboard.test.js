@@ -1,3 +1,7 @@
+/* Name: Mahadhir Bin Mohd Ismail
+ * Student No: A0252808B
+ */
+
 import { render } from "@testing-library/react";
 import Dashboard from "../../../pages/user/Dashboard";
 import { useAuth } from "../../../context/auth";
