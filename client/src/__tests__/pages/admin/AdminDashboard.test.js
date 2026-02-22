@@ -1,3 +1,7 @@
+/* Name: Lee Guan Kai Delon
+ * Student No: A0273286W
+ */
+
 import { render } from "@testing-library/react";
 import AdminDashboard from "../../../pages/admin/AdminDashboard";
 
