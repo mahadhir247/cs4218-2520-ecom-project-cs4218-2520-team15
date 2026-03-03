@@ -280,3 +280,78 @@ To begin unit testing with Jest in your project, follow these steps:
      ```bash
      npm run test
      ```
+
+## 6. UI Testing with Playwright (Scenario-Based)
+
+- **Overview**: UI tests are end-to-end, black-box tests written with Playwright. They exercise complete user and admin workflows across multiple pages (e.g. *login → browse → add to cart → checkout → verify orders*), not just isolated UI elements.
+- **Location**: Place UI tests under a `playwright/tests` directory (e.g. `playwright/tests/auth.e2e.spec.ts`), using the Playwright MCP server configured in `.vscode/mcp.json` as needed.
+- **Routing coverage**: Scenarios below are designed to cover the main routes defined in `client/src/App.js`, including:
+  - Public routes: `/`, `/product/:slug`, `/categories`, `/category/:slug`, `/cart`, `/search`, `/about`, `/contact`, `/policy`, `/register`, `/login`, `/forgot-password`, and `*` (404).
+  - User dashboard routes: `/dashboard/user`, `/dashboard/user/orders`, `/dashboard/user/profile`.
+  - Admin dashboard routes: `/dashboard/admin`, `/dashboard/admin/create-category`, `/dashboard/admin/create-product`, `/dashboard/admin/product/:slug`, `/dashboard/admin/products`, `/dashboard/admin/users`, `/dashboard/admin/orders`.
+
+### 6.1 End-to-end UI scenarios (S1–S16)
+
+- **S1 – User registration and first login**
+  - Home → Register → submit valid details → successful registration → login → redirected to `/dashboard/user` and see user dashboard UI.
+  - Negative: invalid/missing fields are rejected with validation messages and no account is created.
+
+- **S2 – Login, logout, and session persistence**
+  - Login with valid credentials → header/user menu updates → refresh page and remain logged in → logout → redirected away from `/dashboard/user` and access is revoked.
+  - Negative: wrong password or unknown email shows an error; direct navigation to `/dashboard/user` when logged out redirects to login.
+
+- **S3 – Forgot-password flow**
+  - From login, navigate to forgot password page → submit a registered email → see success message and (if implemented) complete the reset flow to log in again.
+
+- **S4 – Home browsing and category navigation**
+  - From `/`, view product list → click a product to go to `/product/:slug` → see details.
+  - Navigate to `/categories` → click a category → land on `/category/:slug` with products filtered by that category.
+
+- **S5 – Search and filter workflow**
+  - Use header search input to search for a keyword → land on `/search` → only matching products are shown.
+  - Apply price/category filters (via components like `Prices` or equivalent) and verify results update accordingly and persist across navigation.
+
+- **S6 – Static pages and global navigation (including 404)**
+  - Navigate via header/footer to `/about`, `/contact`, `/policy` and back to home, confirming header/footer and layout remain consistent.
+  - Visit a non-existent URL and verify the `Pagenotfound` page appears with a working link/button back to home.
+
+- **S7 – Add-to-cart from multiple entry points**
+  - As a logged-in user, add items to cart from home, category list, and product details pages.
+  - Visit `/cart` to verify correct items, quantities, prices, and totals; modify quantities and remove items and check updates.
+
+- **S8 – Checkout and payment happy path**
+  - With a populated cart and logged-in user, proceed from `/cart` to checkout/payment UI (e.g. Braintree).
+  - Complete payment using test credentials/token → see success message/redirect → cart is emptied and a new order appears under `/dashboard/user/orders`.
+
+- **S9 – Checkout and cart edge cases**
+  - Try to checkout with an empty cart and verify that checkout is disabled or an appropriate message is shown.
+  - Remove the last item from the cart and confirm empty-cart state UI.
+  - Optional: attempt a failed payment (invalid/cancelled) and verify appropriate error handling in the UI.
+
+- **S10 – Profile update flow**
+  - Logged-in user navigates to `/dashboard/user/profile` → updates profile fields (e.g. name, address, password if supported) → sees success message and updated details.
+  - Negative: invalid profile input (e.g. too short password) is rejected with clear validation messages.
+
+- **S11 – Orders history and details**
+  - After placing an order (from S8), visit `/dashboard/user/orders`.
+  - Verify the latest order appears with accurate total, status, and any visible metadata; if supported, open an order to see line-item details.
+
+- **S12 – Admin login and dashboard access control**
+  - Log in as an admin user and navigate to `/dashboard/admin` to see admin dashboard cards/links.
+  - Negative: log in as a non-admin user and assert attempts to access `/dashboard/admin` or other admin routes redirect or show “unauthorized”.
+
+- **S13 – Category management workflow (admin)**
+  - From admin dashboard, go to create category page → create a category → confirm it appears in admin lists and on `/categories` and category dropdowns.
+  - Update and delete a category and verify changes are reflected in user-facing category lists and any associated navigation.
+
+- **S14 – Product management workflow (admin)**
+  - From admin dashboard, create a product with name, price, category, and photo → confirm it appears on `/`, `/categories`, `/category/:slug`, and `/product/:slug`.
+  - From `/dashboard/admin/products` and `/dashboard/admin/product/:slug`, update and delete a product and verify all user-facing views and search results reflect the change.
+
+- **S15 – Admin order lifecycle management**
+  - With at least one existing customer order, log in as admin and open `/dashboard/admin/orders`.
+  - Change the order status (e.g. Pending → Shipped/Delivered) and verify status updates both in admin view and in the customer’s `/dashboard/user/orders` page.
+
+- **S16 – Admin users overview and access control**
+  - Visit `/dashboard/admin/users` as admin and verify user list tables and key information.
+  - Attempt to access `/dashboard/admin/users` as a non-admin (or logged-out) user and assert redirect/unauthorized behaviour.
